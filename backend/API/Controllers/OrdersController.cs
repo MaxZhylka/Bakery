@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Core.Interfaces;
 using backend.Core.DTOs;
+using System.Threading.Tasks;
 
 namespace backend.API.Controllers
 {
@@ -11,33 +12,33 @@ namespace backend.API.Controllers
     private readonly IOrderService _orderService = orderService;
 
         [HttpGet]
-    public IEnumerable<OrderDTO> Get()
+    public async Task<IEnumerable<OrderDTO>> Get()
     {
-      return _orderService.GetOrders();
+      return await _orderService.GetOrders();
     }
 
     [HttpGet("{id}")]
-    public OrderDTO Get(Guid id)
+    public async Task<OrderDTO> Get(Guid id)
     {
-      return  _orderService.GetOrder(id);
+      return await _orderService.GetOrder(id);
     }
 
     [HttpPost]
-    public OrderDTO Post([FromBody] OrderDTO order)
+    public async Task<OrderDTO> Post([FromBody] OrderDTO order)
     {
-      return _orderService.CreateOrder(order);
+      return await _orderService.CreateOrder(order);
     }
 
     [HttpPut("{id}")]
-    public OrderDTO Put(Guid id, [FromBody] OrderDTO order)
+    public async Task<OrderDTO> Put(Guid id, [FromBody] OrderDTO order)
     {
-      return _orderService.UpdateOrder(id, order);
+      return await _orderService.UpdateOrder(id, order);
     }
 
     [HttpDelete("{id}")]
-    public OrderDTO Delete(Guid id)
+    public async Task<OrderDTO> Delete(Guid id)
     {
-      return _orderService.DeleteOrder(id);
+      return await _orderService.DeleteOrder(id);
     }
   }
 }

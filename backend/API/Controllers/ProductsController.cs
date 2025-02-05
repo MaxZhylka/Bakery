@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Core.Interfaces;
 using backend.Core.DTOs;
+using System.Threading.Tasks;
 
 namespace backend.API.Controllers
 {
@@ -11,33 +12,33 @@ namespace backend.API.Controllers
         private readonly IProductsService _productsService = productsService;
 
         [HttpGet]
-        public IEnumerable<ProductDTO> Get()
+        public async Task<IEnumerable<ProductDTO>> Get()
         {
-            return _productsService.GetProducts();
+            return await _productsService.GetProducts();
         }
 
         [HttpGet("{id}")]
-        public ProductDTO Get(Guid id)
+        public async Task<ProductDTO> Get(Guid id)
         {
-            return _productsService.GetProduct(id);
+            return await _productsService.GetProduct(id);
         }
 
         [HttpPost]
-        public ProductDTO Post([FromBody] ProductDTO product)
+        public async Task<ProductDTO> Post([FromBody] ProductDTO product)
         {
-            return _productsService.CreateProduct(product);
+            return await _productsService.CreateProduct(product);
         }
 
         [HttpPut("{id}")]
-        public ProductDTO Put(Guid id, [FromBody] ProductDTO product)
+        public async Task<ProductDTO> Put(Guid id, [FromBody] ProductDTO product)
         {
-            return _productsService.UpdateProduct(id, product);
+            return await _productsService.UpdateProduct(id, product);
         }
 
         [HttpDelete("{id}")]
-        public ProductDTO Delete(Guid id)
+        public async Task<ProductDTO> Delete(Guid id)
         {
-            return _productsService.DeleteProduct(id);
+            return await _productsService.DeleteProduct(id);
         }
     }
 }
