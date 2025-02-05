@@ -8,47 +8,41 @@ using System.Collections.Generic;
 
 namespace backend.Core.Services 
 {
-    public class ProductsService : IProductsService
+    public class ProductsService(IProductRepository productsRepository, IMapper mapper) : IProductsService
     {
-        private readonly IProductRepository _productsRepository;
-        private readonly IMapper _mapper;
+        private readonly IProductRepository _productsRepository = productsRepository;
+        private readonly IMapper _mapper = mapper;
 
-        public ProductsService(IProductRepository productsRepository, IMapper mapper)
+        public async Task<IEnumerable<ProductDTO>> GetProducts()
         {
-            _productsRepository = productsRepository;
-            _mapper = mapper;
-        }
-
-        public IEnumerable<ProductDTO> GetProducts()
-        {
-            var products = _productsRepository.GetProductsAsync().Result;
+            IEnumerable<ProductEntity> products = await _productsRepository.GetProductsAsync();
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
 
-        public ProductDTO GetProduct(Guid id)
+        public async Task<ProductDTO> GetProduct(Guid id)
         {
-            var product = _productsRepository.GetProductAsync(id).Result;
+            var product = await _productsRepository.GetProductAsync(id);
             return _mapper.Map<ProductDTO>(product);
         }
 
-        public ProductDTO CreateProduct(ProductDTO product)
+        public async Task<ProductDTO> CreateProduct(ProductDTO product)
         {
             var productEntity = _mapper.Map<ProductEntity>(product);
-            productEntity.Id = Guid.NewGuid(); // Генерация GUID
-            var createdProduct = _productsRepository.CreateProductAsync(productEntity).Result;
+            productEntity.Id = Guid.NewGuid();
+            var createdProduct = await _productsRepository.CreateProductAsync(productEntity);
             return _mapper.Map<ProductDTO>(createdProduct);
         }
 
-        public ProductDTO UpdateProduct(Guid id, ProductDTO product)
+        public async Task<ProductDTO> UpdateProduct(Guid id, ProductDTO product)
         {
             var productEntity = _mapper.Map<ProductEntity>(product);
-            var updatedProduct = _productsRepository.UpdateProductAsync(id, productEntity).Result;
+            var updatedProduct = await _productsRepository.UpdateProductAsync(id, productEntity);
             return _mapper.Map<ProductDTO>(updatedProduct);
         }
 
-        public ProductDTO DeleteProduct(Guid id)
+        public async Task<ProductDTO> DeleteProduct(Guid id)
         {
-            var deletedProduct = _productsRepository.DeleteProductAsync(id).Result;
+            var deletedProduct = await _productsRepository.DeleteProductAsync(id);
             return _mapper.Map<ProductDTO>(deletedProduct);
         }
     }

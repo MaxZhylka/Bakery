@@ -4,10 +4,10 @@ namespace backend.Core.Interfaces
 {
     public interface IProductsService
     {
-        IEnumerable<ProductDTO> GetProducts();
-        ProductDTO GetProduct(Guid id);
-        ProductDTO CreateProduct(ProductDTO product);
-        ProductDTO UpdateProduct(Guid id, ProductDTO product);
-        ProductDTO DeleteProduct(Guid id);
+        Task<IEnumerable<ProductDTO>> GetProducts();
+        Task<ProductDTO> GetProduct(Guid id);
+        Task<ProductDTO> CreateProduct(ProductDTO product);
+        Task<ProductDTO> UpdateProduct(Guid id, ProductDTO product);
+        Task<ProductDTO> DeleteProduct(Guid id);
     }
 }

@@ -5,10 +5,10 @@ namespace backend.Core.Interfaces
 {
     public interface IOrderService
     {
-        IEnumerable<OrderDTO> GetOrders();
-        OrderDTO GetOrder(Guid id);
-        OrderDTO CreateOrder(OrderDTO order);
-        OrderDTO UpdateOrder(Guid id, OrderDTO order);
-        OrderDTO DeleteOrder(Guid id);
+        Task<IEnumerable<OrderDTO>> GetOrders();
+        Task<OrderDTO> GetOrder(Guid id);
+        Task<OrderDTO> CreateOrder(OrderDTO order);
+        Task<OrderDTO> UpdateOrder(Guid id, OrderDTO order);
+        Task<OrderDTO> DeleteOrder(Guid id);
     }
 }

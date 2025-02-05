@@ -13,36 +13,36 @@ namespace backend.Core.Services
         private readonly IOrderRepository _orderRepository = orderRepository;
         private readonly IMapper _mapper = mapper;
 
-        public IEnumerable<OrderDTO> GetOrders()
+        public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
-            var orders = _orderRepository.GetOrdersAsync().Result;
+            var orders = await _orderRepository.GetOrdersAsync();
             return _mapper.Map<IEnumerable<OrderDTO>>(orders);
         }
 
-        public OrderDTO GetOrder(Guid id)
+        public async Task<OrderDTO> GetOrder(Guid id)
         {
-            var order = _orderRepository.GetOrderAsync(id).Result;
+            var order = await _orderRepository.GetOrderAsync(id);
             return _mapper.Map<OrderDTO>(order);
         }
 
-        public OrderDTO CreateOrder(OrderDTO order)
+        public async  Task<OrderDTO> CreateOrder(OrderDTO order)
         {   
             var orderEntity = _mapper.Map<OrderEntity>(order);
             orderEntity.Id = Guid.NewGuid();
-            var createdOrder = _orderRepository.CreateOrderAsync(orderEntity).Result;
+            var createdOrder = await _orderRepository.CreateOrderAsync(orderEntity);
             return _mapper.Map<OrderDTO>(createdOrder);
         }
 
-        public OrderDTO UpdateOrder(Guid id, OrderDTO order)
+        public async Task<OrderDTO> UpdateOrder(Guid id, OrderDTO order)
         {
             var orderEntity = _mapper.Map<OrderEntity>(order);
-            var updatedOrder = _orderRepository.UpdateOrderAsync(id, orderEntity).Result;
+            var updatedOrder = await _orderRepository.UpdateOrderAsync(id, orderEntity);
             return _mapper.Map<OrderDTO>(updatedOrder);
         }
 
-        public OrderDTO DeleteOrder(Guid id)
+        public async Task<OrderDTO> DeleteOrder(Guid id)
         {
-            var deletedOrder = _orderRepository.DeleteOrderAsync(id).Result;
+            var deletedOrder = await _orderRepository.DeleteOrderAsync(id);
             return _mapper.Map<OrderDTO>(deletedOrder);
         }
     }
