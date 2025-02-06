@@ -11,7 +11,7 @@ namespace backend.API.Controllers
   {
     private readonly IOrderService _orderService = orderService;
 
-        [HttpGet]
+    [HttpGet]
     public async Task<IEnumerable<OrderDTO>> Get()
     {
       return await _orderService.GetOrders();

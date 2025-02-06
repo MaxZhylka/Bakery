@@ -10,7 +10,7 @@ namespace backend.Infrastructure.Database
     private readonly string _connectionString;
     public DBConnectionFactory(IConfiguration configuration)
     {
-      _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("DefaultConnection string is null");
+      _connectionString = DotNetEnv.Env.GetString("Connection_String") ?? throw new ArgumentNullException("DefaultConnection string is null");
     }
 
     public SqlConnection CreateConnection()
