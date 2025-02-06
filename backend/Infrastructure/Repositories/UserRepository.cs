@@ -3,6 +3,7 @@ using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 
 using backend.Core.DTOs;
+using backend.Core.Enums;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -39,7 +40,7 @@ namespace backend.Infrastructure.Repositories
                 Id = reader.GetGuid(0),
                 Name = reader.GetString(1),
                 Email = reader.GetString(2),
-                Role = reader.GetString(3)
+                Role = Enum.Parse<UserRole>(reader.GetString(3))
               };
             }
           }
@@ -82,7 +83,7 @@ namespace backend.Infrastructure.Repositories
                 Id = reader.GetGuid(0),
                 Name = reader.GetString(1),
                 Email = reader.GetString(2),
-                Role = reader.GetString(3)
+                Role = Enum.Parse<UserRole>(reader.GetString(3))
               });
             }
           }
@@ -173,7 +174,7 @@ namespace backend.Infrastructure.Repositories
       }
     }
 
-    public async Task<UserDTO> CreateAdminAsync(UserEntity user)
+    public async Task<UserDTO> CreateUserAsync(UserEntity user)
     {
       try
       {
@@ -192,46 +193,7 @@ namespace backend.Infrastructure.Repositories
             command.Parameters.AddWithValue("@Id", user.Id);
             command.Parameters.AddWithValue("@Name", user.Name);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@Password", user.Password);
-            command.Parameters.AddWithValue("@Role", "Admin");
-            command.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
-
-            await command.ExecuteScalarAsync();
-          }
-
-          return await GetUserAsync(user.Id);
-        }
-      }
-      catch (SqlException e)
-      {
-        throw new Exception("Error inserting user into database", e);
-      }
-      catch (Exception e)
-      {
-        throw new Exception("Error getting DB connection", e);
-      }
-    }
-
-    public async Task<UserDTO> CreateManagerAsync(UserEntity user)
-    {
-      try
-      {
-        using (var connection = _connectionFactory.CreateConnection())
-        {
-          if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-
-          var query = @"
-                        INSERT INTO Users (Id, Name, Email, Role, Password, CreatedAt) 
-                        OUTPUT INSERTED.Id 
-                        VALUES (@Id, @Name, @Email, @Role, @Password, @CreatedAt)";
-
-          using (var command = new SqlCommand(query, connection))
-          {
-            command.Parameters.AddWithValue("@Id", user.Id);
-            command.Parameters.AddWithValue("@Name", user.Name);
-            command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@Role", "Manager");
+            command.Parameters.AddWithValue("@Role", user.Role);
             command.Parameters.AddWithValue("@Password", user.Password);
             command.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
 

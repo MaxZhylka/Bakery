@@ -12,16 +12,10 @@ public class UsersController(IUserService userService) : ControllerBase
 
 
   [Authorize(Roles = "Admin")]
-  [HttpPost("admin")]
+  [HttpPost("User")]
   public async Task<UserDTO> CreateAdmin([FromBody] UserCreateDTO admin)
   {
-    return await _userService.CreateAdmin(admin);
-  }
-
-  [HttpPost("manager")]
-  public async Task<UserDTO> CreateManager([FromBody] UserCreateDTO  user)
-  {
-    return await _userService.CreateManager(user);
+    return await _userService.CreateUser(admin);
   }
 
   [HttpPut("user/{id}")]

@@ -12,7 +12,7 @@ namespace backend.Core.Services
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IMapper _mapper = mapper;
 
-        private readonly PasswordHasher<UserEntity> _passwordHasher = new();
+        private readonly PasswordHasher<string> _passwordHasher = new();
         public async Task<UserDTO> GetUser(Guid id)
         {
             var user = await _userRepository.GetUserAsync(id);
@@ -36,39 +36,20 @@ namespace backend.Core.Services
             return await _userRepository.UpdateUserAsync(id, user);
         }
 
-        public async Task<UserDTO> CreateAdmin(UserCreateDTO user)
+        public async Task<UserDTO> CreateUser(UserCreateDTO user)
         {
-            #pragma warning disable CS8625
-            var hashedPassword = _passwordHasher.HashPassword(null, user.Password);
+
+            var hashedPassword = _passwordHasher.HashPassword(user.Email, user.Password);
             var userEntity = new UserEntity
             {
                 Id = Guid.NewGuid(),
                 Name = user.Name,
                 Email = user.Email,
                 Password = hashedPassword,
-                Role = "Admin",
+                Role = user.Role,
                 CreatedAt = DateTime.Now
             };
-            var createdUser = await _userRepository.CreateAdminAsync(userEntity);
-            return _mapper.Map<UserDTO>(createdUser);
-        }
-
-        public async Task<UserDTO> CreateManager(UserCreateDTO user)
-        {
-            #pragma warning disable CS8625
-            var hashedPassword = _passwordHasher.HashPassword(null, user.Password);
-
-
-            var userEntity = new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = user.Name,
-                Email = user.Email,
-                Password = hashedPassword,
-                Role = "Manager",
-                CreatedAt = DateTime.Now
-            };
-            var createdUser = await _userRepository.CreateManagerAsync(userEntity);
+            var createdUser = await _userRepository.CreateUserAsync(userEntity);
             return _mapper.Map<UserDTO>(createdUser);
         }
     }

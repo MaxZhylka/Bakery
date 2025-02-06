@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.Core.Models;
+using backend.Core.Enums;
 
 public class AuthService : IAuthService
 {
@@ -26,7 +27,7 @@ public class AuthService : IAuthService
     if (user == null)
       throw new UnauthorizedAccessException("Користувач не знайдений");
 
-    if (!VerifyPassword(password, user.Password))
+    if (!VerifyPassword(password, user.Password, email))
       throw new UnauthorizedAccessException("Невірний пароль");
 
     var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role);
@@ -87,13 +88,13 @@ public class AuthService : IAuthService
     await _authRepository.DeleteRefreshTokenAsync(refreshToken);
   }
 
-  private string GenerateToken(string userId, string email, string role)
+  private string GenerateToken(string userId, string email, UserRole role)
     {
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.Role, role.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DotNetEnv.Env.GetString("SECRET_KEY")));
@@ -110,10 +111,10 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-  private static bool VerifyPassword(string password, string hashedPassword)
+  private static bool VerifyPassword(string password, string hashedPassword, string email)
   {
-    var passwordHasher = new PasswordHasher<UserDTO>();
-    #pragma warning disable CS8625
-    return passwordHasher.VerifyHashedPassword(null, hashedPassword, password) == PasswordVerificationResult.Success;
+    var passwordHasher = new PasswordHasher<string>();
+
+    return passwordHasher.VerifyHashedPassword(email, hashedPassword, password) == PasswordVerificationResult.Success;
   }
 }

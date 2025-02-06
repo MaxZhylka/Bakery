@@ -9,7 +9,6 @@ namespace backend.Infrastructure.Interfaces
         Task<IEnumerable<UserDTO>> GetUsersAsync();
         Task<UserDTO> DeleteUserAsync(Guid id);
         Task<UserDTO> UpdateUserAsync(Guid id, UserDTO user);
-        Task<UserDTO> CreateAdminAsync(UserEntity user);
-        Task<UserDTO> CreateManagerAsync(UserEntity user);
+        Task<UserDTO> CreateUserAsync(UserEntity user);
     }
 }

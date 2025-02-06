@@ -81,6 +81,8 @@ public class AuthController(IAuthService authService) : ControllerBase
   {
     string? refreshToken = HttpContext.Request.Cookies["RefreshToken"];
     await _authService.Logout(refreshToken);
+    Response.Cookies.Delete("RefreshToken");
+    Response.Cookies.Delete("DeviceId");
     return Ok();
   }
 

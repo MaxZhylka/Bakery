@@ -13,9 +13,7 @@ namespace backend.Core.Interfaces
 
     Task<UserDTO> UpdateUser(Guid id, UserDTO user);
 
-    Task<UserDTO> CreateAdmin(UserCreateDTO manager);
-
-    Task<UserDTO> CreateManager(UserCreateDTO manager);
+    Task<UserDTO> CreateUser(UserCreateDTO manager);
 
   }
 }

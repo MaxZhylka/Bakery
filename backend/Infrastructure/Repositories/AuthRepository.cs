@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
+using backend.Core.Enums;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -38,7 +39,7 @@ namespace backend.Infrastructure.Repositories
                 Name = reader.GetString(1),
                 Email = reader.GetString(2),
                 Password = reader.GetString(3),
-                Role = reader.GetString(4)
+                Role = Enum.Parse<UserRole>(reader.GetString(4))
               };
             }
           }
@@ -84,7 +85,7 @@ namespace backend.Infrastructure.Repositories
                 Name = reader.GetString(1),
                 Email = reader.GetString(2),
                 Password = reader.GetString(3),
-                Role = reader.GetString(4)
+                Role = Enum.Parse<UserRole>(reader.GetString(4))
               };
             }
           }
