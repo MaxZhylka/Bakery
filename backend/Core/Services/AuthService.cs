@@ -56,14 +56,13 @@ public class AuthService : IAuthService
     };
   }
 
-  public async Task<UserTokensDTO> Refresh(string? refreshToken, string? deviceId, UserDTO user)
+  public async Task<UserTokensDTO> Refresh(string? refreshToken, string? deviceId)
   {
     if(string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(deviceId))
       throw new UnauthorizedAccessException("refreshToken or deviceId not found");
-    bool alreadyExists = await _authRepository.CheckTokenAsync(refreshToken, deviceId);
 
-    if (!alreadyExists)
-      throw new UnauthorizedAccessException("Users with this refresh token and device id not found");
+    UserDTO user = await _authRepository.CheckTokenAsync(refreshToken, deviceId) ?? 
+    throw new UnauthorizedAccessException("Users with this refresh token and device id not found");
 
     var newRefreshToken = Guid.NewGuid().ToString();
     var newDeviceId = Guid.NewGuid().ToString();

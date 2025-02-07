@@ -1,6 +1,8 @@
 using Microsoft.Data.SqlClient;
 using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
+using backend.Core.Enums;
+using Core.Exceptions;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -47,7 +49,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (SqlException e)
             {
-                throw new Exception("Error executing query", e);
+                throw new DatabaseOperationException(Operations.GetProducts, e);
             }
             catch (Exception e)
             {
@@ -86,14 +88,14 @@ namespace backend.Infrastructure.Repositories
                     }
 
                     if (product == null)
-                        throw new KeyNotFoundException($"Product with ID {id} was not found");
+                        throw new ProductNotFoundException(id);
 
                     return product;
                 }
             }
             catch (SqlException e)
             {
-                throw new Exception("Error executing query", e);
+                throw new DatabaseOperationException(Operations.GetProduct, e);
             }
             catch (Exception e)
             {
@@ -129,7 +131,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (SqlException e)
             {
-                throw new Exception("Error inserting product into database", e);
+                throw new DatabaseOperationException(Operations.CreateProduct, e);
             }
             catch (Exception e)
             {
@@ -170,7 +172,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (SqlException e)
             {
-                throw new Exception("Error updating product in database", e);
+                throw new DatabaseOperationException(Operations.UpdateProduct, e);
             }
             catch (Exception e)
             {
@@ -201,7 +203,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (SqlException e)
             {
-                throw new Exception("Error deleting product from database", e);
+                throw new DatabaseOperationException(Operations.DeleteProduct, e);
             }
             catch (Exception e)
             {

@@ -1,9 +1,9 @@
 using Microsoft.Data.SqlClient;
-using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 
 using backend.Core.DTOs;
 using backend.Core.Enums;
+using Core.Exceptions;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -46,14 +46,14 @@ namespace backend.Infrastructure.Repositories
           }
 
           if (user == null)
-            throw new KeyNotFoundException($"User with ID {id} was not found");
+            throw new UserNotFoundException(id);
 
           return user;
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetUser, e);
       }
       catch (Exception e)
       {
@@ -92,7 +92,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetUsers, e);
       }
       catch (Exception e)
       {
@@ -125,7 +125,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error deleting user from database", e);
+        throw new DatabaseOperationException(Operations.DeleteUser, e);
       }
       catch (Exception e)
       {
@@ -166,7 +166,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error updating user in database", e);
+        throw new DatabaseOperationException(Operations.UpdateUser, e);
       }
       catch (Exception e)
       {
@@ -205,7 +205,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error inserting user into database", e);
+        throw new DatabaseOperationException(Operations.CreateUser, e);
       }
       catch (Exception e)
       {

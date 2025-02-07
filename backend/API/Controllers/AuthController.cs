@@ -4,6 +4,7 @@ using backend.Core.DTOs;
 using backend.Core.Interfaces;
 using backend.Core.Models;
 using Microsoft.Net.Http.Headers;
+using Core.Attributes;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -11,6 +12,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 {
   private readonly IAuthService _authService = authService;
 
+  [ErrorHandler]
   [HttpPost("Login")]
   public async Task<UserDTO> Login([FromBody] CredentialsEntity credentials)
   {
@@ -43,12 +45,13 @@ public class AuthController(IAuthService authService) : ControllerBase
     };
   }
 
+  [ErrorHandler]
   [HttpPost("Refresh")]
-  public async Task<UserDTO> Refresh([FromBody] UserDTO user)
+  public async Task<string> Refresh()
   {
     string? deviceId = HttpContext.Request.Cookies["DeviceId"];
     string? refreshToken = HttpContext.Request.Cookies["RefreshToken"];
-    var tokens = await _authService.Refresh(refreshToken, deviceId, user);
+    var tokens = await _authService.Refresh(refreshToken, deviceId);
 
     Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
     {
@@ -66,16 +69,10 @@ public class AuthController(IAuthService authService) : ControllerBase
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
-    return new UserDTO
-    {
-      Id = user.Id,
-      Email = user.Email,
-      Name = user.Name,
-      Role = user.Role,
-      AccessToken = tokens.AccessToken
-    };
+    return tokens.AccessToken;
   }
 
+  [ErrorHandler]
   [HttpPost("Logout")]
   public async Task<IActionResult> Logout()
   {

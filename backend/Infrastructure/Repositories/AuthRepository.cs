@@ -1,7 +1,9 @@
 using Microsoft.Data.SqlClient;
 using backend.Core.Models;
-using backend.Infrastructure.Interfaces;
+using backend.Core.DTOs;
 using backend.Core.Enums;
+using backend.Infrastructure.Interfaces;
+using Core.Exceptions;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -45,14 +47,14 @@ namespace backend.Infrastructure.Repositories
           }
 
           if (user == null)
-            throw new KeyNotFoundException($"User with email {email} was not found");
+            throw new UserNotFoundException(email);
 
           return user;
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetUser, e);
       }
       catch (Exception e)
       {
@@ -71,7 +73,10 @@ namespace backend.Infrastructure.Repositories
 
           UserEntity? user = null;
 
-          var query = "SELECT u.Id, u.Name, u.Email, u.Password, u.Role FROM Users u INNER JOIN RefreshTokens rt ON u.Id = rt.UserId WHERE rt.Token = @Token";
+          var query = @"SELECT u.Id, u.Name, u.Email, u.Password, u.Role 
+                        FROM Users u 
+                        INNER JOIN RefreshTokens rt ON u.Id = rt.UserId 
+                        WHERE rt.RefreshToken = @Token";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Token", refreshToken);
@@ -91,14 +96,14 @@ namespace backend.Infrastructure.Repositories
           }
 
           if (user == null)
-            throw new KeyNotFoundException($"User with refresh token {refreshToken} was not found");
+            throw new UserNotFoundByRefreshException();
 
           return user;
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetUser, e);
       }
       catch (Exception e)
       {
@@ -118,7 +123,6 @@ namespace backend.Infrastructure.Repositories
           var query = @"
                         INSERT INTO RefreshTokens (Id, UserId, RefreshToken, DeviceId, Expiration) 
                         VALUES (@Id, @UserId, @Token, @DeviceId, @Expiration)";
-
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Id", Guid.NewGuid());
@@ -141,7 +145,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error saving refresh token", e);
+        throw new DatabaseOperationException(Operations.Register, e);
       }
       catch (Exception e)
       {
@@ -172,7 +176,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.Refresh, e);
       }
       catch (Exception e)
       {
@@ -180,37 +184,54 @@ namespace backend.Infrastructure.Repositories
       }
     }
 
-        public async Task<bool> CheckTokenAsync(string refreshToken, string deviceId)
+    public async Task<UserDTO?> CheckTokenAsync(string refreshToken, string deviceId)
     {
       try
       {
         using (var connection = _connectionFactory.CreateConnection())
         {
-
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
 
-          var query = "SELECT COUNT(*) FROM RefreshTokens WHERE DeviceId = @DeviceId AND Expiration > @CurrentDate AND RefreshToken = @Token";
+          var query = @"SELECT u.Id, u.Name, u.Email, u.Role 
+                                  FROM RefreshTokens rt
+                                  JOIN Users u ON rt.UserId = u.Id
+                                  WHERE rt.DeviceId = @DeviceId 
+                                        AND rt.Expiration > @CurrentDate 
+                                        AND rt.RefreshToken = @Token";
+
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@DeviceId", deviceId);
             command.Parameters.AddWithValue("@Token", refreshToken);
             command.Parameters.AddWithValue("@CurrentDate", DateTime.UtcNow);
 
-            object? result = await command.ExecuteScalarAsync();
-            int count = (result as int?) ?? 0;
-            return count > 0;
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+              if (await reader.ReadAsync())
+              {
+                return new UserDTO
+                {
+                  Id = reader.GetGuid(0),
+                  Name = reader.GetString(1),
+                  Email = reader.GetString(2),
+                  Role = Enum.Parse<UserRole>(reader.GetString(3))
+                };
+              }
+            }
           }
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.Refresh, e);
       }
       catch (Exception e)
       {
         throw new Exception("Error getting DB connection", e);
       }
+
+      return null;
     }
 
     public async Task<RefreshTokenEntity> UpdateRefreshTokenAsync(string oldRefreshToken, string refreshToken, string deviceId)
@@ -234,7 +255,9 @@ namespace backend.Infrastructure.Repositories
             command.Parameters.AddWithValue("@DeviceId", deviceId);
             command.Parameters.AddWithValue("@Expiration", DateTime.UtcNow.AddDays(30));
 
-            await command.ExecuteNonQueryAsync();
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            if (rowsAffected == 0)
+              throw new KeyNotFoundException("Refresh token not found for update");
           }
 
           return new RefreshTokenEntity
@@ -248,7 +271,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error updating refresh token", e);
+        throw new DatabaseOperationException(Operations.Refresh, e);
       }
       catch (Exception e)
       {
@@ -256,7 +279,7 @@ namespace backend.Infrastructure.Repositories
       }
     }
 
-public async Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, string refreshToken, string oldDeviceId, string deviceId)
+    public async Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, string refreshToken, string oldDeviceId, string deviceId)
     {
       try
       {
@@ -278,12 +301,14 @@ public async Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, s
             command.Parameters.AddWithValue("@OldDeviceId", oldDeviceId);
             command.Parameters.AddWithValue("@Expiration", DateTime.UtcNow.AddDays(30));
 
-            await command.ExecuteNonQueryAsync();
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            if (rowsAffected == 0)
+              throw new KeyNotFoundException("Refresh token not found for update by id");
           }
 
           return new RefreshTokenEntity
           {
-            UserId = Guid.Empty,
+            UserId = userId,
             RefreshToken = refreshToken,
             DeviceId = deviceId,
             Expiration = DateTime.UtcNow.AddDays(30)
@@ -292,16 +317,16 @@ public async Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, s
       }
       catch (SqlException e)
       {
-        throw new Exception("Error updating refresh token", e);
+        throw new DatabaseOperationException(Operations.Refresh, e);
       }
       catch (Exception e)
       {
         throw new Exception("Error getting DB connection", e);
       }
     }
+
     public async Task DeleteRefreshTokenAsync(string refreshToken)
     {
-      
       try
       {
         using (var connection = _connectionFactory.CreateConnection())
@@ -309,20 +334,20 @@ public async Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, s
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
 
-          var query = "DELETE FROM RefreshTokens WHERE RefreshToken =@RefreshToken";
+          var query = "DELETE FROM RefreshTokens WHERE RefreshToken = @RefreshToken";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@RefreshToken", refreshToken);
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             if (rowsAffected == 0)
-              throw new KeyNotFoundException($"User with such RefreshToken not found for deletion");
+              throw new KeyNotFoundException("Refresh token not found for deletion");
           }
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error deleting refresh token", e);
+        throw new DatabaseOperationException(Operations.Refresh, e);
       }
       catch (Exception e)
       {
