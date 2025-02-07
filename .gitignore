@@ -107,3 +107,4 @@ backend/Thumbs.db
 
 # Azure Functions local settings file
 backend/local.settings.json
+backend/.env

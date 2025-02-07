@@ -1,6 +1,8 @@
 using Microsoft.Data.SqlClient;
 using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
+using Core.Exceptions;
+using backend.Core.Enums;
 
 namespace backend.Infrastructure.Repositories
 {
@@ -41,7 +43,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetOrders, e);
       }
       catch (Exception e)
       {
@@ -55,7 +57,7 @@ namespace backend.Infrastructure.Repositories
       {
         using (connection ??= connectionFactory.CreateConnection())
         {
-          if(connection.State != System.Data.ConnectionState.Open)
+          if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
 
           OrderEntity? order = null;
@@ -81,14 +83,14 @@ namespace backend.Infrastructure.Repositories
           }
 
           if (order == null)
-            throw new KeyNotFoundException($"Order with ID {id} was not found");
+            throw new OrderNotFoundException(id);
 
           return order;
         }
       }
       catch (SqlException e)
       {
-        throw new Exception("Error executing query", e);
+        throw new DatabaseOperationException(Operations.GetOrder, e);
       }
       catch (Exception e)
       {
@@ -102,7 +104,7 @@ namespace backend.Infrastructure.Repositories
       {
         using (var connection = connectionFactory.CreateConnection())
         {
-            await connection.OpenAsync();
+          await connection.OpenAsync();
 
           var query = @"
             INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerName) 
@@ -126,7 +128,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error inserting order into database", e);
+        throw new DatabaseOperationException(Operations.CreateOrder, e);
       }
       catch (Exception e)
       {
@@ -140,7 +142,7 @@ namespace backend.Infrastructure.Repositories
       {
         using (var connection = connectionFactory.CreateConnection())
         {
-            await connection.OpenAsync();
+          await connection.OpenAsync();
 
           var query = @"
             UPDATE Orders 
@@ -170,7 +172,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error updating order in database", e);
+        throw new DatabaseOperationException(Operations.UpdateOrder, e);
       }
       catch (Exception e)
       {
@@ -184,7 +186,7 @@ namespace backend.Infrastructure.Repositories
       {
         using (var connection = connectionFactory.CreateConnection())
         {
-            await connection.OpenAsync();
+          await connection.OpenAsync();
 
           var order = await GetOrderAsync(id, connection);
 
@@ -202,7 +204,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (SqlException e)
       {
-        throw new Exception("Error deleting order from database", e);
+        throw new DatabaseOperationException(Operations.DeleteOrder, e);
       }
       catch (Exception e)
       {
