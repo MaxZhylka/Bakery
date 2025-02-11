@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using backend.Core.Attributes;
 
 namespace backend.Core.Models

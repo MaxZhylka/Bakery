@@ -4,6 +4,7 @@ using backend.Infrastructure.Interfaces;
 using backend.Core.DTOs;
 using backend.Core.Enums;
 using Core.Exceptions;
+using backend.Core.Models;
 
 namespace backend.Infrastructure.Repositories
 {

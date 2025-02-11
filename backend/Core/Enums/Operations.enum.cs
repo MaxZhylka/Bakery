@@ -21,6 +21,11 @@ namespace backend.Core.Enums
     GetUser,
     UpdateUser,
     DeleteUser,
-    Register
+    Register,
+    SaveLog,
+    GetLog,
+    GetAllLogs,
+    GetLogById,
+    GetLogsByUserID
   }
 }
