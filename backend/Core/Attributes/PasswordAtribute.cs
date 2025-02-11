@@ -7,7 +7,7 @@ namespace backend.Core.Attributes
 
   public class PasswordAttribute : ValidationAttribute
   {
-    private const string _pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$";
+    private const string _pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%#*?&])[A-Za-z\d@$#!%*?&]{8,}$";
 
     public PasswordAttribute()
     {
