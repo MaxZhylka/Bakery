@@ -75,7 +75,5 @@ namespace backend.Core.Middlewares
         _ => null
       };
     }
-
-
   }
 }

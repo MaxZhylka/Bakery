@@ -33,9 +33,9 @@ namespace backend.API.Controllers
     [ErrorHandler]
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet("/ByUserId/{userId}")]
-    public async Task<UserActionDTO> GetLogByUserId(Guid userId)
+    public async Task<UserActionDTO[]> GetLogByUserId(Guid userId)
     {
-      return await _loggerService.GetLogById(userId);
+      return await _loggerService.GetLogsByUserId(userId);
     }
   }
 }

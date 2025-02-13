@@ -37,13 +37,16 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
       await _authRepository.SaveRefreshTokenAsync(user.Id, refreshToken, deviceId);
     }
 
-    var remoteIpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+    var remoteIpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress;
+    var sanitizedIp = remoteIpAddress != null && !remoteIpAddress.IsIPv4MappedToIPv6
+        ? remoteIpAddress.ToString()
+        : "Invalid IP";
     await _loggerRepository.SaveLogAsync(new UserActionLog
     {
       Id = Guid.NewGuid(),
       UserId = user.Id,
       Operation = Operations.Login,
-      Details = $"User '{user.Email}' logged in from device: {deviceId}, IP: {remoteIpAddress}",
+      Details = $"User '{user.Email}' logged in from device: {deviceId}, IP: {sanitizedIp}",
       Timestamp = DateTime.UtcNow
     });
 

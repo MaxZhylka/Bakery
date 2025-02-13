@@ -19,15 +19,16 @@ namespace backend.Core.Services
       return await _loggerRepository.GetLogByIdAsync(LogId);
     }
 
-    public async Task<UserActionDTO[]> GetLogsByUserID(Guid userId)
+    public async Task<UserActionDTO[]> GetLogsByUserId(Guid userId)
     {
       return await _loggerRepository.GetLogsByUserIdAsync(userId);
     }
 
-    public Task<UserActionLog> LogAction(Guid userId, Operations operation, string details)
+    public Task LogAction(Guid userId, Operations operation, string details)
     {
       UserActionLog userActionLog = new() { UserId = userId, Operation = operation, Details = details };
-      return Task.Run(() => _loggerRepository.SaveLogAsync(userActionLog));
+      _ = _loggerRepository.SaveLogAsync(userActionLog);
+      return Task.CompletedTask;
     }
   }
 }
