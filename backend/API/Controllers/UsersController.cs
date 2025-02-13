@@ -13,35 +13,39 @@ public class UsersController(IUserService userService) : ControllerBase
 
   [ErrorHandler]
   [Authorize(Roles = "Admin")]
-  [HttpPost("User")]
-  public async Task<UserDTO> CreateAdmin([FromBody] UserCreateDTO admin)
+  [HttpPost]
+  public async Task<UserDTO> CreateUser([FromBody] UserCreateDTO admin)
   {
     return await _userService.CreateUser(admin);
   }
 
-[ErrorHandler]
-  [HttpPut("user/{id}")]
+  [ErrorHandler]
+  [Authorize(Roles = "Admin")]
+  [HttpPut("{id}")]
   public async Task<UserDTO> UpdateUser(Guid id, [FromBody] UserDTO user)
   {
     return await _userService.UpdateUser(id, user);
   }
 
   [ErrorHandler]
-  [HttpGet("users")]
+  [Authorize(Roles = "Admin")]
+  [HttpGet]
   public async Task<IEnumerable<UserDTO>> GetUsers()
   {
     return await _userService.GetUsers();
   }
 
   [ErrorHandler]
-  [HttpGet("users/{id}")]
+  [Authorize(Roles = "Admin")]
+  [HttpGet("{id}")]
   public async Task<UserDTO> GetUsers(Guid id)
   {
     return await _userService.GetUser(id);
   }
 
   [ErrorHandler]
-  [HttpDelete("user/{id}")]
+  [Authorize(Roles = "Admin")]
+  [HttpDelete("{id}")]
   public async Task<UserDTO> DeleteUser(Guid id)
   {
     return await _userService.DeleteUser(id);
