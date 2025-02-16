@@ -23,7 +23,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
       HttpOnly = true,
       Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -31,7 +31,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
       HttpOnly = true,
       Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -46,30 +46,38 @@ public class AuthController(IAuthService authService) : ControllerBase
   }
 
   [ErrorHandler]
-  [HttpPost("Refresh")]
-  public async Task<string> Refresh()
+  [HttpGet("Refresh")]
+  public async Task<UserDTO> Refresh()
   {
     string? deviceId = HttpContext.Request.Cookies["DeviceId"];
     string? refreshToken = HttpContext.Request.Cookies["RefreshToken"];
-    var tokens = await _authService.Refresh(refreshToken, deviceId);
 
-    Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
+    UserTokensDTO userWithTokens = await _authService.Refresh(refreshToken, deviceId);
+
+    Response.Cookies.Append("RefreshToken", userWithTokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
       Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
-    Response.Cookies.Append("DeviceId", tokens.DeviceId, new CookieOptions
+    Response.Cookies.Append("DeviceId", userWithTokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
       Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
-    return tokens.AccessToken;
+    return new UserDTO
+    {
+      Id = userWithTokens.Id,
+      Email = userWithTokens.Email,
+      Name = userWithTokens.Name,
+      Role = userWithTokens.Role,
+      AccessToken = userWithTokens.AccessToken
+    };
   }
 
   [ErrorHandler]

@@ -9,7 +9,6 @@ namespace backend.Core.Models
     [Required]
     public required string Email { get; set; }
 
-    [Password]
     [Required]
     public required string Password { get; set; }
 }

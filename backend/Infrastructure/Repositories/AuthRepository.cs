@@ -186,13 +186,13 @@ namespace backend.Infrastructure.Repositories
 
     public async Task<UserDTO?> CheckTokenAsync(string refreshToken, string deviceId)
     {
+
       try
       {
         using (var connection = _connectionFactory.CreateConnection())
         {
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
-
           var query = @"SELECT u.Id, u.Name, u.Email, u.Role 
                                   FROM RefreshTokens rt
                                   JOIN Users u ON rt.UserId = u.Id
@@ -215,7 +215,7 @@ namespace backend.Infrastructure.Repositories
                   Id = reader.GetGuid(0),
                   Name = reader.GetString(1),
                   Email = reader.GetString(2),
-                  Role = Enum.Parse<UserRole>(reader.GetString(3))
+                  Role = reader.GetString(3)
                 };
               }
             }

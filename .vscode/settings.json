@@ -1,0 +1,56 @@
+{
+  "workbench.colorTheme": "Darcula",
+  "files.autoSave": "afterDelay",
+  "editor.unicodeHighlight.allowedCharacters": {
+    "і": true,
+    "І": true
+  },
+  "editor.codeLensFontSize": 14,
+  "editor.suggestFontSize": 14,
+  "editor.minimap.sectionHeaderFontSize": 18,
+  "scm.inputFontSize": 12,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "tabnine.experimentalAutoImports": true,
+  "editor.minimap.enabled": false,
+  "sonarlint.connectedMode.connections.sonarcloud": [
+    {
+      "organizationKey": "ita-social-projects",
+      "connectionId": "ita-social-projects"
+    }
+  ],
+  "diffEditor.ignoreTrimWhitespace": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "editor.defaultFormatter": "ms-dotnettools.csharp",
+  "explorer.confirmDelete": false,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "editor.inlayHints.fontSize": 14,
+  "notebook.markup.fontSize": 14,
+  "notebook.output.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "terminal.integrated.allowChords": false,
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "sonarlint.rules": {
+    "secrets:S6703": {
+      "level": "off"
+    }
+  },
+  "[html]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+    "editor.tabSize": 2
+  },
+  "notebook.defaultFormatter": "ms-dotnettools.csharp",
+
+  "editor.insertSpaces": true,
+
+  "[javascript]": {
+    "editor.tabSize": 2
+  },
+}
+

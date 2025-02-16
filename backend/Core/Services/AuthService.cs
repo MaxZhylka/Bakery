@@ -30,7 +30,7 @@ public class AuthService : IAuthService
     if (!VerifyPassword(password, user.Password, email))
       throw new UnauthorizedAccessException("Невірний пароль");
 
-    var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role);
+    var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role.ToString());
 
     var refreshToken = Guid.NewGuid().ToString();
 
@@ -49,7 +49,7 @@ public class AuthService : IAuthService
       Id = user.Id,
       Email = user.Email,
       Name = user.Name,
-      Role = user.Role,
+      Role = user.Role.ToString(),
       AccessToken = accessToken,
       RefreshToken = refreshToken,
       DeviceId = deviceId
@@ -58,6 +58,7 @@ public class AuthService : IAuthService
 
   public async Task<UserTokensDTO> Refresh(string? refreshToken, string? deviceId)
   {
+
     if(string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(deviceId))
       throw new UnauthorizedAccessException("refreshToken or deviceId not found");
 
@@ -70,6 +71,7 @@ public class AuthService : IAuthService
 
     await _authRepository.UpdateRefreshTokenAsync(refreshToken, newRefreshToken, newDeviceId);
     return new UserTokensDTO {
+      Id = user.Id,
       Name = user.Name,
       Email = user.Email,
       Role = user.Role,
@@ -87,7 +89,7 @@ public class AuthService : IAuthService
     await _authRepository.DeleteRefreshTokenAsync(refreshToken);
   }
 
-  private string GenerateToken(string userId, string email, UserRole role)
+  private string GenerateToken(string userId, string email, string role)
     {
         var claims = new List<Claim>
         {
