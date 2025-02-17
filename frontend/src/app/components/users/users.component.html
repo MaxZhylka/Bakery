@@ -1,0 +1,56 @@
+<h2 class="text-center mt-10">Список користувачів</h2>
+<div class="m-5 flex flex-col">
+  <a class="self-end" (click)="openCreateDialog()" mat-fab extended> Створити користувача <mat-icon>person_circle</mat-icon></a>
+</div>
+<div class="m-5 p-5 flex border flex-col justify-center mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef> № </th>
+      <td mat-cell *matCellDef="let element; let index = index"> {{ index + 1 }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Ім'я </th>
+      <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Пошта </th>
+      <td mat-cell *matCellDef="let element"> {{ element.email }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef> Роль </th>
+      <td mat-cell *matCellDef="let element"> {{ element.role }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef> Дата створення </th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.createdAt | date:'dd.MM.yyyy' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Дії </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button matTooltip="Редагувати" (click)="editUser(element)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Видалити" (click)="deleteUser(element)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator
+    [pageSize]="paginationParams.size"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>

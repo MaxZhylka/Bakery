@@ -1,0 +1,44 @@
+
+    <mat-progress-bar *ngIf="isLoading$ | async" mode="indeterminate" class="w-full mb-6"></mat-progress-bar>
+    <div class="flex flex-col items-center justify-center h-screen">
+        <h1 class="text-2xl font-bold mb-6">{{ isRegisterRoute ? 'Registration Form' : 'Login Form' }}</h1>
+
+
+        <form [formGroup]="loginForm" class="flex flex-col items-center w-96 gap-3" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Enter your email</mat-label>
+            <input matInput placeholder="pat@example.com" formControlName="email" required>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Email is required</mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Invalid email format</mat-error>
+        </mat-form-field>
+    
+        <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Enter your password</mat-label>
+            <input matInput placeholder="Your password" formControlName="password" type="password" required>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Password is required</mat-error>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">Password must be at least 6 characters</mat-error>
+        </mat-form-field>
+    
+        <mat-form-field *ngIf="isRegisterRoute" appearance="fill" class="w-full">
+            <mat-label>Enter your username</mat-label>
+            <input matInput placeholder="Your username" formControlName="login" required>
+            <mat-error *ngIf="loginForm.get('login')?.hasError('required')">Username is required</mat-error>
+            <mat-error *ngIf="loginForm.get('login')?.hasError('minlength')">Username must be at least 3 characters</mat-error>
+        </mat-form-field>
+    
+        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid" class="w-full">
+            {{ isRegisterRoute ? 'Register' : 'Login' }}
+        </button>
+        </form>
+    
+        <p class="mt-4">
+        <span *ngIf="isRegisterRoute">Already have an account?
+            <a routerLink="/login" class="text-blue-500 hover:underline">Log in</a>
+        </span>
+    
+        <span *ngIf="!isRegisterRoute">Don't have an account?
+            <a routerLink="/register" class="text-blue-500 hover:underline">Register</a>
+        </span>
+        </p>
+    </div>
+    

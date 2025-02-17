@@ -33,6 +33,20 @@ builder.Services.AddIdentityServer();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
+builder.Services.AddCors(options =>
+{
+    var clientUrl = DotNetEnv.Env.GetString("CLIENT_URL") ?? "http://localhost:4200";
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins(clientUrl)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -61,6 +75,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
+app.UseAuthorization();
+
 
 app.UseAuthentication();
 app.UseMiddleware<LoggerMiddleware>();

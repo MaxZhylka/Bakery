@@ -42,6 +42,7 @@ frontend/typings
 frontend/.DS_Store
 frontend/Thumbs.db
 
+frontend/src/app/environments/environment.ts
 Bakery.sln
 
 # ========================

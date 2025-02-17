@@ -1,0 +1,21 @@
+<div mat-dialog-title class="text-center">Створення замовлення</div>
+<form [formGroup]="form" class="flex flex-col justify-center gap-2 align-middle" (ngSubmit)="onSubmit()">
+  <mat-form-field class="w-[300px] self-center" appearance="fill">
+    <mat-label>Кількість</mat-label>
+    <input matInput formControlName="productCount" type="number" required>
+    <mat-error *ngIf="form.get('productCount')?.hasError('required')">
+      Вкажіть кількість товару.
+    </mat-error>
+    <mat-error *ngIf="form.get('productCount')?.hasError('min')">
+      Кількість повинна бути не меншою за 1.
+    </mat-error>
+  </mat-form-field>
+
+  <div class="self-center"> Продукт:  {{product.name}}</div>
+  <div class="self-center"> Загальна ціна  {{form.get('price')?.value }}</div>
+
+  <div class="self-center">
+    <button mat-button type="button" (click)="onCancel()">Скасувати</button>
+    <button mat-flat-button color="primary" type="submit">Створити</button>
+  </div>
+</form>

@@ -1,0 +1,64 @@
+
+
+<h2 class="text-center mt-10">Cписок продуктів</h2>
+<div class="m-5 flex flex-col">
+  <div class="self-end">
+    <mat-form-field class="w-[500px] mr-4">
+      <mat-label>Тип запиту</mat-label>
+      <mat-select (selectionChange)="getNewData($event)">
+          <mat-option *ngFor="let request of requestTypes" [value]="request">{{request}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  <button (click)="createProduct()" mat-fab extended> Створити продукт <mat-icon>cake_add</mat-icon></button>
+</div>
+</div>
+<div class="m-5 p-5 flex border flex-col justify-center mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" class="">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Назва </th>
+      <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="price">
+      <th mat-header-cell *matHeaderCellDef> Ціна </th>
+      <td mat-cell *matCellDef="let element"> {{ element.price }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="count">
+      <th mat-header-cell *matHeaderCellDef> Кількість </th>
+      <td mat-cell *matCellDef="let element"> {{ element.count }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef> Дата створення </th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.createdAt | date:'dd.MM.yyyy' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Дії </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button matTooltip="Редагувати" (click)="editProduct(element)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Видалити" (click)="deleteProduct(element)">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Замовити" (click)="createOrder(element)">
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator
+    [pageSize]="paginationParams.size"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>

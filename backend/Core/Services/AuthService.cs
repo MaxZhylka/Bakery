@@ -64,6 +64,7 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
 
   public async Task<UserTokensDTO> Refresh(string? refreshToken, string? deviceId)
   {
+
     if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(deviceId))
       throw new UnauthorizedAccessException("refreshToken or deviceId not found");
 
@@ -75,8 +76,9 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
     var newAccessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role);
 
     await _authRepository.UpdateRefreshTokenAsync(refreshToken, newRefreshToken, newDeviceId);
-    return new UserTokensDTO
-    {
+
+    return new UserTokensDTO {
+      Id = user.Id,
       Name = user.Name,
       Email = user.Email,
       Role = user.Role,
