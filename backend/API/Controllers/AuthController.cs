@@ -5,6 +5,7 @@ using backend.Core.Interfaces;
 using backend.Core.Models;
 using Microsoft.Net.Http.Headers;
 using Core.Attributes;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -81,6 +82,7 @@ public class AuthController(IAuthService authService) : ControllerBase
   }
 
   [ErrorHandler]
+  [Authorize(Roles = "Admin,Manager")]
   [HttpPost("Logout")]
   public async Task<IActionResult> Logout()
   {

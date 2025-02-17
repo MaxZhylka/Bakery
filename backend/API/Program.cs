@@ -5,9 +5,9 @@ using backend.Infrastructure.Interfaces;
 using backend.Infrastructure.Repositories;
 using backend.Core.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Duende.IdentityServer.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using backend.Core.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -26,6 +26,9 @@ builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILoggerService, LoggerService>();
+builder.Services.AddScoped<ILoggerRepository, LoggerRepository>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentityServer();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -65,7 +68,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -76,6 +78,10 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAngularApp");
 app.UseAuthorization();
 
+
+app.UseAuthentication();
+app.UseMiddleware<LoggerMiddleware>();
+app.UseAuthorization();
 
 app.MapControllers();
 
