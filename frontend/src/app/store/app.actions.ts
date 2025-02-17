@@ -1,4 +1,4 @@
-import { User } from "../interfaces";
+import { AuthResponse, RegisterPayload, User } from "../interfaces";
 
 
 export class SetLoading {
@@ -13,7 +13,7 @@ export class Login {
 
 export class Register {
     static readonly type = '[User] Register';
-    constructor(public payload: { login: string; email: string; password: string }) {}
+    constructor(public payload: RegisterPayload) {}
 }
 
 export class LoadChats {
@@ -23,7 +23,7 @@ export class LoadChats {
 
 export class RegisterSuccess {
     static readonly type = '[User] Register Success';
-    constructor(public payload: { user: User }) {}
+    constructor(public payload: AuthResponse ) {}
 }
 
 export class LoginSuccess {

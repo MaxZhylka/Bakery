@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
-import { LoginPayload, RegisterPayload } from '../../interfaces';
+import { AuthResponse, LoginPayload, RegisterPayload, User } from '../../interfaces';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -25,17 +25,17 @@ export class AuthService {
     this.isAuthenticated$.next(true);
   }
 
-  login(loginPayload: LoginPayload): Observable<any> {
-    return this.http.post(`${this.apiUrl}/Auth/login`, loginPayload, { withCredentials: true }).pipe(
-      tap((response: any) => {
+  login(loginPayload: LoginPayload): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, loginPayload, { withCredentials: true }).pipe(
+      tap((response) => {
         this.setToken(response.accessToken);
       })
     );
   }
 
-  register(registerPayload: RegisterPayload): Observable<any> {
-    return this.http.post(`${this.apiUrl}/Auth/registration`, registerPayload, { withCredentials: true }).pipe(
-      tap((response: any) => {
+  register(registerPayload: RegisterPayload): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/registration`, registerPayload, { withCredentials: true }).pipe(
+      tap((response) => {
         this.setToken(response.accessToken);
       })
     );
@@ -48,7 +48,7 @@ export class AuthService {
   }
 
   refreshToken(): Observable<string> {
-    return this.http.get<{ accessToken: string }>(`${this.apiUrl}/Auth/refresh`, { withCredentials: true }).pipe(
+    return this.http.get<AuthResponse>(`${this.apiUrl}/Auth/refresh`, { withCredentials: true }).pipe(
       tap((response) => {
         this.setToken(response.accessToken);
       }),
@@ -60,9 +60,9 @@ export class AuthService {
     return this.isAuthenticated$.asObservable();
   }
 
-  checkAuth(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/Auth/refresh`, { withCredentials: true }).pipe(
-      tap((response: any) => {
+  checkAuth(): Observable<AuthResponse> {
+    return this.http.get<AuthResponse>(`${this.apiUrl}/Auth/refresh`, { withCredentials: true }).pipe(
+      tap((response) => {
         this.isAuthenticated$.next(true);
         localStorage.setItem('token', response.accessToken);
       })

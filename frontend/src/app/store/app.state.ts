@@ -100,7 +100,7 @@ export class UserState {
         ctx.dispatch(new SetLoading(false));
         this.router.navigate(['']);
         ctx.patchState({
-            currentUser: action.payload.user
+            currentUser: action.payload
         });
         this.snackBar.open('Registration successful!', 'Close', { panelClass: 'success-snackbar' });
     }

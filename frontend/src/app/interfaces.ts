@@ -25,7 +25,7 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload {
-    login: string;
+    name: string;
     email: string;
     password: string;
 }
@@ -50,7 +50,7 @@ export interface Product {
 export interface Log {
     id: string;
     userName: string;
-    userRole: string;
+    userRole: Roles;
     operation: string;
     details: string;
     timestamp: string;
@@ -67,6 +67,11 @@ export interface ICreateOrder {
     price: number;
     customerName: string;
 };
+
+
+export interface AuthResponse extends User {
+    accessToken: string;
+}
 
 export interface IUpdateOrder {
     productId: string;

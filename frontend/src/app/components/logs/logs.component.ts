@@ -4,7 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { GetLogs } from '../../store/logs.actions';
-import { PaginationParams, DataByPagination, Log } from '../../interfaces';
+import { PaginationParams, DataByPagination, Log, Roles } from '../../interfaces';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +19,7 @@ export class LogsComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   public displayedColumns: string[] = ['id', 'userName', 'userRole', 'operation', 'timestamp'];
-  public dataSource: Log[] = [{ id: '1', userName: 'Max Zhylka', userRole: 'Admin', operation: 'create', details: '', timestamp: '12-04-2025' }];
+  public dataSource: Log[] = [{ id: '1', userName: 'Max Zhylka', userRole: Roles.Admin, operation: 'create', details: '', timestamp: '12-04-2025' }];
   public paginationParams: PaginationParams = { size: 10, offset: 0 };
   public logs$!: Observable<DataByPagination<Log[]>>;
   private readonly destroy$: Subject<void> = new Subject<void>();

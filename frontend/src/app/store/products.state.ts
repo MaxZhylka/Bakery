@@ -45,7 +45,7 @@ export class ProductsState {
   }
 
   @Action(GetProductsWhereCountMoreThan100)
-  getProductsWhereCountMoreThan10(ctx: StateContext<ProductsStateModel>, { payload }: GetProductsWhereCountMoreThan100) {
+  getProductsWhereCountMoreThan100(ctx: StateContext<ProductsStateModel>, { payload }: GetProductsWhereCountMoreThan100) {
     this.store.dispatch(new SetLoading(true));
     return this.productsService.getProductsByCount(payload).pipe(
       tap(products => ctx.patchState({ products })),

@@ -58,7 +58,7 @@ export class RegistrationFormComponent implements OnInit {
     const { email, password, login } = this.loginForm.value;
 
     if(this.isRegisterRoute) {
-      this.store.dispatch(new Register({ email, password, login }))
+      this.store.dispatch(new Register({ email, password, name: login }))
     }
     else
     {
