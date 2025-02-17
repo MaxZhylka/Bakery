@@ -30,7 +30,7 @@ public class AuthService : IAuthService
     if (!VerifyPassword(password, user.Password, email))
       throw new UnauthorizedAccessException("Невірний пароль");
 
-    var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role.ToString());
+    var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role);
 
     var refreshToken = Guid.NewGuid().ToString();
 
@@ -49,7 +49,7 @@ public class AuthService : IAuthService
       Id = user.Id,
       Email = user.Email,
       Name = user.Name,
-      Role = user.Role.ToString(),
+      Role = user.Role,
       AccessToken = accessToken,
       RefreshToken = refreshToken,
       DeviceId = deviceId
@@ -89,7 +89,7 @@ public class AuthService : IAuthService
     await _authRepository.DeleteRefreshTokenAsync(refreshToken);
   }
 
-  private string GenerateToken(string userId, string email, string role)
+  private string GenerateToken(string userId, string email, UserRole role)
     {
         var claims = new List<Claim>
         {

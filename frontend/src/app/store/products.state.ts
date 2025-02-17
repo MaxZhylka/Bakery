@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { State, Action, StateContext, Store } from '@ngxs/store';
 import { ProductsService } from '../services/product-service/product.service';
 import {
-  GetProducts, GetProductsWhereCountMoreThan10, GetProductsWherePriceMoreThan250, GetProductsWhereCountMoreThan50AndPriceLessThan100,
+  GetProducts, GetProductsWhereCountMoreThan100, GetProductsWherePriceMoreThan250, GetProductsWhereCountMoreThan50AndPriceLessThan100,
   CreateProduct, UpdateProduct, DeleteProduct
 } from './products.actions';
 import { DataByPagination, Product } from '../interfaces';
@@ -44,8 +44,8 @@ export class ProductsState {
     );
   }
 
-  @Action(GetProductsWhereCountMoreThan10)
-  getProductsWhereCountMoreThan10(ctx: StateContext<ProductsStateModel>, { payload }: GetProductsWhereCountMoreThan10) {
+  @Action(GetProductsWhereCountMoreThan100)
+  getProductsWhereCountMoreThan10(ctx: StateContext<ProductsStateModel>, { payload }: GetProductsWhereCountMoreThan100) {
     this.store.dispatch(new SetLoading(true));
     return this.productsService.getProductsByCount(payload).pipe(
       tap(products => ctx.patchState({ products })),

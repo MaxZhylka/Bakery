@@ -4,8 +4,8 @@ export class GetProducts {
     static readonly type = '[Products] Get products';
     constructor(public paginationParams: PaginationParams) { }
 }
-export class GetProductsWhereCountMoreThan10 {
-    static readonly type = '[Product] Get Products Where Count More Than 10';
+export class GetProductsWhereCountMoreThan100 {
+    static readonly type = '[Product] Get Products Where Count More Than 100';
     constructor(public payload: PaginationParams) { }
 }
 

@@ -3,6 +3,7 @@ import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { LoginPayload, RegisterPayload } from '../../interfaces';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class AuthService {
   private readonly TOKEN_KEY = 'token';
   private readonly isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient,
+    private readonly router: Router) { }
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
@@ -42,7 +44,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.isAuthenticated$.next(false);
-    window.location.href = '/login';
+    this.router.navigate(['/login']);
   }
 
   refreshToken(): Observable<string> {
@@ -50,13 +52,13 @@ export class AuthService {
       tap((response) => {
         this.setToken(response.accessToken);
       }),
-      map((response) => response.accessToken) 
+      map((response) => response.accessToken)
     );
   }
 
   getIsAuthenticated(): Observable<boolean> {
     return this.isAuthenticated$.asObservable();
-  }  
+  }
 
   checkAuth(): Observable<any> {
     return this.http.get(`${this.apiUrl}/Auth/refresh`, { withCredentials: true }).pipe(

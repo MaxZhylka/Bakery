@@ -9,15 +9,10 @@ import { User, PaginationParams, DataByPagination } from '../../interfaces';
 export class UsersService {
   private readonly apiUrl = '/api/users';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   getUsers(params: PaginationParams): Observable<DataByPagination<User[]>> {
-    return this.http.get<DataByPagination<User[]>>(this.apiUrl, {
-      params: { 
-        size: params.size.toString(), 
-        offset: params.offset.toString() 
-      }
-    });
+    return this.http.get<DataByPagination<User[]>>(this.apiUrl, { params: { ...params } });
   }
 
   createUser(user: User): Observable<User> {

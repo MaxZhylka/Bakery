@@ -6,7 +6,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: Roles;
     createdAt: string;
 }
 
@@ -78,7 +78,12 @@ export interface IUpdateOrder {
 export interface ICreateUser {
     name: string;
     password: string;
-    role: string;
+    role: Roles;
     email: string;
 }
 
+export enum Roles {
+    Admin = 'Admin',
+    User = 'User',
+    Manager = 'Manager'
+}

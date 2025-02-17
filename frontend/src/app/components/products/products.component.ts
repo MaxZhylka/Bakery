@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
 import { DataByPagination, ICreateOrder, PaginationParams, Product } from '../../interfaces';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { GetProducts, GetProductsWhereCountMoreThan10, GetProductsWhereCountMoreThan50AndPriceLessThan100, GetProductsWherePriceMoreThan250, CreateProduct, UpdateProduct, DeleteProduct } from '../../store/products.actions';
+import { GetProducts, GetProductsWhereCountMoreThan100, GetProductsWhereCountMoreThan50AndPriceLessThan100, GetProductsWherePriceMoreThan250, CreateProduct, UpdateProduct, DeleteProduct } from '../../store/products.actions';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -60,7 +60,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.products$.pipe(takeUntil(this.destroy$)).subscribe((value) => { this.dataSource = value.data });
   }
 
-  public onPageChange(event: any): void {
+  public onPageChange(event: PageEvent): void {
     this.paginationParams.size = event.pageSize;
     this.paginationParams.offset = event.pageIndex;
     this.store.dispatch(new GetProducts(this.paginationParams));
@@ -78,7 +78,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   public getNewData(event: MatSelectChange): void {
     switch (event.value) {
       case OrderRequestTypes.COUNT_MORE_THAN_100:
-        this.store.dispatch(new GetProductsWhereCountMoreThan10(this.paginationParams));
+        this.store.dispatch(new GetProductsWhereCountMoreThan100(this.paginationParams));
         break;
       case OrderRequestTypes.PRICE_MORE_THAN_250:
         this.store.dispatch(new GetProductsWherePriceMoreThan250(this.paginationParams));

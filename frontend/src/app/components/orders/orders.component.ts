@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
 import { Observable, Subject, takeUntil } from 'rxjs';
@@ -38,7 +38,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onPageChange(event: any): void {
+  public onPageChange(event: PageEvent): void {
     this.paginationParams.size = event.pageSize;
     this.paginationParams.offset = event.pageIndex;
     this.store.dispatch(new GetOrders(this.paginationParams));

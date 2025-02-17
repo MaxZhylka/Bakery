@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DataByPagination, PaginationParams, Product } from '../../interfaces';
 import { environment } from '../../environments/environment';
@@ -8,28 +8,24 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class ProductsService {
-    private readonly apiUrl = environment.apiUrl+'/Products';
+  private readonly apiUrl = environment.apiUrl + '/Products';
 
   constructor(private readonly http: HttpClient) { }
 
   getProducts(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    const httpParams = new HttpParams({ fromObject: params as unknown as { [param: string]: string } });
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/`, { params: httpParams });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/`, { params: { ...params } });
   }
 
   getProductsByCount(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    const httpParams = new HttpParams({ fromObject: params as unknown as { [param: string]: string } });
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/count-more-than`, { params: httpParams });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/count-more-than`, { params: { ...params } });
   }
 
   getProductsByPrice(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    const httpParams = new HttpParams({ fromObject: params as unknown as { [param: string]: string } });
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-than`, { params: httpParams });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-than`, { params: { ...params } });
   }
 
   getFilteredProducts(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    const httpParams = new HttpParams({ fromObject: params as unknown as { [param: string]: string } });
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-count-less`, { params: httpParams });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-count-less`, { params: { ...params } });
   }
 
   createProduct(product: Product): Observable<Product> {

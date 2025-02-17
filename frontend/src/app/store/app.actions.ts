@@ -6,11 +6,6 @@ export class SetLoading {
     constructor(public payload: boolean) {}
 }
 
-export class SetMessageLoading {
-    static readonly type = '[App] Set Loading';
-    constructor(public payload: boolean) {}
-}
-
 export class Login {
     static readonly type = '[User] Login';
     constructor(public payload: { email: string; password: string }) {}

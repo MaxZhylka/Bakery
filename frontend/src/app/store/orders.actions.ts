@@ -1,4 +1,4 @@
-import { PaginationParams, ICreateOrder, IUpdateOrder } from '../interfaces';
+import { PaginationParams, ICreateOrder, IUpdateOrder, DataByPagination, Order } from '../interfaces';
 
 export class GetOrders {
   static readonly type = '[Orders] Get orders';
@@ -7,7 +7,7 @@ export class GetOrders {
 
 export class GetOrdersSuccess {
   static readonly type = '[Orders] Get orders success';
-  constructor(public orders: any[]) {}
+  constructor(public orders: DataByPagination<Order[]>) {}
 }
 
 export class GetOrdersFail {
@@ -22,7 +22,7 @@ export class CreateOrder {
 
 export class CreateOrderSuccess {
   static readonly type = '[Orders] Create order success';
-  constructor(public createdOrder: any) {}
+  constructor(public createdOrder: Order) {}
 }
 
 export class CreateOrderFail {

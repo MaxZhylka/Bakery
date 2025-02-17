@@ -12,10 +12,11 @@ import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SetLoading } from './app.actions';
+import { DataByPagination, Order } from '../interfaces';
 
 
 export interface OrdersStateModel {
-  orders: any[];
+  orders: DataByPagination<Order[]>;
   dynamicData: any;
   error: string | null;
 }
@@ -23,7 +24,7 @@ export interface OrdersStateModel {
 @State<OrdersStateModel>({
   name: 'orders',
   defaults: {
-    orders: [],
+    orders: {data: [], total: 0},
     dynamicData: null,
     error: null,
   }

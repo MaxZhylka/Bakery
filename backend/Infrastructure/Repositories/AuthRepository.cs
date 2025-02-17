@@ -215,7 +215,7 @@ namespace backend.Infrastructure.Repositories
                   Id = reader.GetGuid(0),
                   Name = reader.GetString(1),
                   Email = reader.GetString(2),
-                  Role = reader.GetString(3)
+                  Role = Enum.Parse<UserRole>(reader.GetString(3))
                 };
               }
             }
