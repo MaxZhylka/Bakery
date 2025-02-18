@@ -16,7 +16,7 @@ namespace backend.API.Controllers
     [ErrorHandler]
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
-    public async Task<IEnumerable<UserActionDTO>> GetAllLogs(PaginationParameters parameters)
+    public async Task<PaginatedResult<UserActionDTO>> GetAllLogs(PaginationParameters parameters)
     {
       return await _loggerService.GetAllLogs(parameters);
     }

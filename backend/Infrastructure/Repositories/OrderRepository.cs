@@ -3,51 +3,148 @@ using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 using Core.Exceptions;
 using backend.Core.Enums;
+using backend.Core.DTOs;
+
 
 namespace backend.Infrastructure.Repositories
 {
   public class OrderRepository(IDBConnectionFactory connectionFactory) : IOrderRepository
   {
-    public async Task<IEnumerable<OrderEntity>> GetOrdersAsync(SqlConnection? connection = null)
+    private readonly IDBConnectionFactory _connectionFactory = connectionFactory;
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersAsync(PaginationParameters paginationParameters, SqlConnection? connection = null)
     {
       try
       {
-        using (connection ??= connectionFactory.CreateConnection())
+        using (connection ??= _connectionFactory.CreateConnection())
         {
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
 
-          List<OrderEntity> orders = [];
-
-          string query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerName FROM Orders";
-
-          using (var command = new SqlCommand(query, connection))
-          using (var reader = await command.ExecuteReaderAsync())
+          const string countQuery = "SELECT COUNT(*) FROM Orders";
+          int totalCount;
+          using (var countCommand = new SqlCommand(countQuery, connection))
           {
+            totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+          }
+
+          string itemsQuery = @"
+                        SELECT Id, ProductId, CustomerName, ProductCount, Price, CreatedAt
+                        FROM Orders
+                        ORDER BY CreatedAt DESC
+                        OFFSET @Offset ROWS
+                        FETCH NEXT @PageSize ROWS ONLY
+                    ";
+
+          var items = new List<OrderDTO>();
+
+          using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+          {
+            int offset = paginationParameters.Offset * paginationParameters.Size;
+            itemsCommand.Parameters.AddWithValue("@Offset", offset);
+            itemsCommand.Parameters.AddWithValue("@PageSize", paginationParameters.Size);
+
+            using var reader = await itemsCommand.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-              orders.Add(new OrderEntity
+              var product = new OrderDTO
               {
                 Id = reader.GetGuid(0),
                 ProductId = reader.GetGuid(1),
-                ProductCount = reader.GetInt32(2),
-                Price = reader.GetDecimal(3),
-                CreatedAt = reader.GetDateTime(4),
-                CustomerName = reader.GetString(5)
-              });
+                CustomerName = reader.GetString(2),
+                ProductCount = reader.GetInt32(3),
+                Price = reader.GetDecimal(4),
+                CreatedAt = reader.GetDateTime(5)
+              };
+              items.Add(product);
             }
           }
 
-          return orders;
+          return new PaginatedResult<OrderDTO>
+          {
+            Total = totalCount,
+            Data = items
+          };
         }
       }
       catch (SqlException e)
       {
-        throw new DatabaseOperationException(Operations.GetOrders, e);
+        throw new DatabaseOperationException(Operations.GetProducts, e);
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
+      }
+    }
+
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserIdAsync(PaginationParameters paginationParameters, Guid userId)
+    {
+      try
+      {
+        using (var connection = _connectionFactory.CreateConnection())
+        {
+          if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
+
+          const string countQuery = @"
+                SELECT COUNT(*) 
+                FROM Orders
+                WHERE UserId = @UserId
+            ";
+          int totalCount;
+          using (var countCommand = new SqlCommand(countQuery, connection))
+          {
+            countCommand.Parameters.AddWithValue("@UserId", userId);
+            totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+          }
+
+          string itemsQuery = @"
+                SELECT Id, ProductId, CustomerName, ProductCount, Price, CreatedAt
+                FROM Orders
+                WHERE UserId = @UserId
+                ORDER BY CreatedAt DESC
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+            ";
+
+          var items = new List<OrderDTO>();
+
+          using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+          {
+            int offset = paginationParameters.Offset * paginationParameters.Size;
+            itemsCommand.Parameters.AddWithValue("@UserId", userId);
+            itemsCommand.Parameters.AddWithValue("@Offset", offset);
+            itemsCommand.Parameters.AddWithValue("@PageSize", paginationParameters.Size);
+
+            using var reader = await itemsCommand.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+              var orderDto = new OrderDTO
+              {
+                Id = reader.GetGuid(0),
+                ProductId = reader.GetGuid(1),
+                CustomerName = reader.GetString(2),
+                ProductCount = reader.GetInt32(3),
+                Price = reader.GetDecimal(4),
+                CreatedAt = reader.GetDateTime(5)
+              };
+              items.Add(orderDto);
+            }
+          }
+
+          return new PaginatedResult<OrderDTO>
+          {
+            Total = totalCount,
+            Data = items
+          };
+        }
+      }
+      catch (SqlException e)
+      {
+        throw new DatabaseOperationException(Operations.GetProducts, e);
+      }
+      catch (Exception e)
+      {
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -55,7 +152,7 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (connection ??= connectionFactory.CreateConnection())
+        using (connection ??= _connectionFactory.CreateConnection())
         {
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
@@ -94,7 +191,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -102,7 +199,7 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
 
@@ -132,7 +229,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -140,7 +237,7 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
 
@@ -176,7 +273,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -184,7 +281,7 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
 
@@ -208,7 +305,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
   }

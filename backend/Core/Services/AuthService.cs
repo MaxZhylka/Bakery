@@ -8,12 +8,18 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.Core.Enums;
 using backend.Core.Models;
+using backend.Infrastructure.Repositories;
+using System.Runtime.CompilerServices;
 
-public class AuthService(IAuthRepository authRepository, ILoggerRepository loggerRepository, IHttpContextAccessor httpContextAccessor) : IAuthService
+public class AuthService(IAuthRepository authRepository, ILoggerRepository loggerRepository, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor) : IAuthService
 {
   private readonly IAuthRepository _authRepository = authRepository;
+
+  private readonly IUserRepository _userRepository = userRepository;
   private readonly ILoggerRepository _loggerRepository = loggerRepository;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+  private readonly PasswordHasher<string> _passwordHasher = new();
 
   public async Task<UserTokensDTO> Login(string email, string password, string? deviceId)
   {
@@ -41,11 +47,59 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
     var sanitizedIp = remoteIpAddress != null && !remoteIpAddress.IsIPv4MappedToIPv6
         ? remoteIpAddress.ToString()
         : "Invalid IP";
-    await _loggerRepository.SaveLogAsync(new UserActionLog
+    _ = _loggerRepository.SaveLogAsync(new UserActionLog
     {
       Id = Guid.NewGuid(),
       UserId = user.Id,
       Operation = Operations.Login,
+      Details = $"User '{user.Email}' logged in from device: {deviceId}, IP: {sanitizedIp}",
+      Timestamp = DateTime.UtcNow
+    });
+
+    return new UserTokensDTO
+    {
+      Id = user.Id,
+      Email = user.Email,
+      Name = user.Name,
+      Role = user.Role,
+      AccessToken = accessToken,
+      RefreshToken = refreshToken,
+      DeviceId = deviceId
+    };
+  }
+
+  public async Task<UserTokensDTO> Register(RegisterCredentialsEntity credentials)
+  {
+
+    var hashedPassword = _passwordHasher.HashPassword(credentials.Email, credentials.Password);
+    UserDTO user = await _userRepository.CreateUserAsync(
+      new UserEntity
+      {
+        Id = Guid.NewGuid(),
+        Name = credentials.Name,
+        Email = credentials.Email,
+        Password = hashedPassword,
+        Role = UserRole.User,
+        CreatedAt = DateTime.Now
+      });
+
+    var accessToken = GenerateToken(user.Id.ToString(), user.Email, user.Role);
+
+    var refreshToken = Guid.NewGuid().ToString();
+
+    var deviceId = Guid.NewGuid().ToString();
+
+    await _authRepository.SaveRefreshTokenAsync(user.Id, refreshToken, deviceId);
+
+    var remoteIpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress;
+    var sanitizedIp = remoteIpAddress != null && !remoteIpAddress.IsIPv4MappedToIPv6
+        ? remoteIpAddress.ToString()
+        : "Invalid IP";
+    _ = _loggerRepository.SaveLogAsync(new UserActionLog
+    {
+      Id = Guid.NewGuid(),
+      UserId = user.Id,
+      Operation = Operations.Register,
       Details = $"User '{user.Email}' logged in from device: {deviceId}, IP: {sanitizedIp}",
       Timestamp = DateTime.UtcNow
     });
@@ -77,7 +131,8 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
 
     await _authRepository.UpdateRefreshTokenAsync(refreshToken, newRefreshToken, newDeviceId);
 
-    return new UserTokensDTO {
+    return new UserTokensDTO
+    {
       Id = user.Id,
       Name = user.Name,
       Email = user.Email,
@@ -100,9 +155,9 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
   {
     var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(ClaimTypes.Role, role.ToString())
+            new(JwtRegisteredClaimNames.Sub, userId),
+            new(JwtRegisteredClaimNames.Email, email),
+            new(ClaimTypes.Role, role.ToString())
         };
 
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DotNetEnv.Env.GetString("SECRET_KEY")));

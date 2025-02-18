@@ -1,12 +1,12 @@
-<mat-toolbar *ngIf="userData">
+<mat-toolbar *ngIf="displayHeader() && userData" >
   <a mat-button routerLink="/">
     <mat-icon>storefront</mat-icon>
     Bakery
   </a>
 
   <div class="nav-links" *ngIf="!isMobile">
-    <a routerLink="/users" mat-button>Користувачі</a>
-    <a routerLink="/logs" mat-button>Журнал</a>
+    <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" routerLink="/users" mat-button>Користувачі</a>
+    <a *ngIf="userData.role === roles.Admin" routerLink="/logs" mat-button>Журнал</a>
     <a routerLink="/orders" mat-button>Замовлення</a>
     <a routerLink="/products" mat-button>Продукти</a>
   </div>
@@ -28,8 +28,8 @@
   </button>
 
   <mat-menu #burgerMenu="matMenu">
-    <button mat-menu-item routerLink="/users">Користувачі</button>
-    <button mat-menu-item routerLink="/logs">Журнал</button>
+    <button *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-menu-item routerLink="/users">Користувачі</button>
+    <button *ngIf="userData.role === roles.Admin" mat-menu-item routerLink="/logs">Журнал</button>
     <button mat-menu-item routerLink="/orders">Замовлення</button>
     <button mat-menu-item routerLink="/products">Продукти</button>
     <button mat-menu-item routerLink="/cabinet">Кабінет</button>

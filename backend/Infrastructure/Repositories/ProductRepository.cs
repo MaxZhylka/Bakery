@@ -3,19 +3,15 @@ using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 using backend.Core.Enums;
 using Core.Exceptions;
+using backend.Core.DTOs;
 
 namespace backend.Infrastructure.Repositories
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository(IDBConnectionFactory connectionFactory) : IProductRepository
     {
-        private readonly IDBConnectionFactory _connectionFactory;
+        private readonly IDBConnectionFactory _connectionFactory = connectionFactory;
 
-        public ProductRepository(IDBConnectionFactory connectionFactory)
-        {
-            _connectionFactory = connectionFactory;
-        }
-
-        public async Task<IEnumerable<ProductEntity>> GetProductsAsync(SqlConnection? connection = null)
+        public async Task<PaginatedResult<ProductEntity>> GetProductsAsync(PaginationParameters paginationParameters, SqlConnection? connection = null)
         {
             try
             {
@@ -24,27 +20,49 @@ namespace backend.Infrastructure.Repositories
                     if (connection.State != System.Data.ConnectionState.Open)
                         await connection.OpenAsync();
 
-                    List<ProductEntity> products = [];
-
-                    string query = "SELECT Id, Name, Price, ProductCount, CreatedAt FROM Products";
-
-                    using (var command = new SqlCommand(query, connection))
-                    using (var reader = await command.ExecuteReaderAsync())
+                    const string countQuery = "SELECT COUNT(*) FROM Products";
+                    int totalCount;
+                    using (var countCommand = new SqlCommand(countQuery, connection))
                     {
+                        totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+                    }
+
+                    string itemsQuery = @"
+                        SELECT Id, Name, ProductCount, Price, CreatedAt
+                        FROM Products
+                        ORDER BY CreatedAt DESC
+                        OFFSET @Offset ROWS
+                        FETCH NEXT @PageSize ROWS ONLY
+                    ";
+
+                    var items = new List<ProductEntity>();
+
+                    using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+                    {
+                        int offset = paginationParameters.Offset * paginationParameters.Size;
+                        itemsCommand.Parameters.AddWithValue("@Offset", offset);
+                        itemsCommand.Parameters.AddWithValue("@PageSize", paginationParameters.Size);
+
+                        using var reader = await itemsCommand.ExecuteReaderAsync();
                         while (await reader.ReadAsync())
                         {
-                            products.Add(new ProductEntity
+                            var product = new ProductEntity
                             {
                                 Id = reader.GetGuid(0),
                                 Name = reader.GetString(1),
-                                Price = reader.GetDecimal(2),
-                                ProductCount = reader.GetInt32(3),
+                                ProductCount = reader.GetInt32(2),
+                                Price = reader.GetDecimal(3),
                                 CreatedAt = reader.GetDateTime(4)
-                            });
+                            };
+                            items.Add(product);
                         }
                     }
 
-                    return products;
+                    return new PaginatedResult<ProductEntity>
+                    {
+                        Total = totalCount,
+                        Data = items
+                    };
                 }
             }
             catch (SqlException e)
@@ -53,10 +71,93 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
+        public async Task<PaginatedResult<ProductEntity>> GetProductsByValuesAsync(int count, bool directionCount, double price, bool directionPrice, PaginationParameters paginationParams)
+        {
+            try
+            {
+                using (var connection = _connectionFactory.CreateConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        await connection.OpenAsync();
+
+
+                    var conditions = new List<string>
+                    {
+                        directionCount
+                        ? "Count > @Count"
+                        : "Count < @Count",
+                        directionPrice
+                        ? "Price > @Price"
+                        : "Price < @Price"
+                    };
+
+                    string whereClause = string.Join(" AND ", conditions);
+
+                    string countQuery = $"SELECT COUNT(*) FROM Products WHERE {whereClause}";
+                    int totalCount;
+                    using (var countCommand = new SqlCommand(countQuery, connection))
+                    {
+                        countCommand.Parameters.AddWithValue("@Count", count);
+                        countCommand.Parameters.AddWithValue("@Price", price);
+
+                        totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+                    }
+
+                    string itemsQuery = $@"
+                        SELECT Id, Name, Count, Price, CreatedAt
+                        FROM Products
+                        WHERE {whereClause}
+                        ORDER BY CreatedAt DESC
+                        OFFSET @Offset ROWS
+                        FETCH NEXT @PageSize ROWS ONLY
+                    ";
+
+                    var items = new List<ProductEntity>();
+
+                    using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+                    {
+                        itemsCommand.Parameters.AddWithValue("@Count", count);
+                        itemsCommand.Parameters.AddWithValue("@Price", price);
+
+                        int offset = paginationParams.Offset * paginationParams.Size;
+                        itemsCommand.Parameters.AddWithValue("@Offset", offset);
+                        itemsCommand.Parameters.AddWithValue("@PageSize", paginationParams.Size);
+
+                        using var reader = await itemsCommand.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            var product = new ProductEntity
+                            {
+                                Id = reader.GetGuid(0),
+                                Name = reader.GetString(1),
+                                ProductCount = reader.GetInt32(2),
+                                Price = reader.GetDecimal(3),
+                                CreatedAt = reader.GetDateTime(4)
+                            };
+                            items.Add(product);
+                        }
+                    }
+
+                    return new PaginatedResult<ProductEntity>
+                    {
+                        Total = totalCount,
+                        Data = items
+                    };
+                }
+            }
+            catch (SqlException e)
+            {
+                throw new DatabaseOperationException(Operations.GetProducts, e);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error getting DB connection{e}");
+            }
+        }
         public async Task<ProductEntity> GetProductAsync(Guid id, SqlConnection? connection = null)
         {
             try
@@ -99,7 +200,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
@@ -135,7 +236,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
@@ -176,7 +277,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
@@ -207,8 +308,57 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
+
+        public async Task<IEnumerable<ProductSalesDto>> GetProductSalesAsync()
+        {
+            try
+            {
+                using (var connection = _connectionFactory.CreateConnection())
+                {
+                    if (connection.State != System.Data.ConnectionState.Open)
+                        await connection.OpenAsync();
+
+                    string query = @"
+                SELECT 
+                    p.Name AS ProductName,
+                    SUM(o.ProductCount) AS TotalSold
+                FROM Orders o
+                JOIN Products p ON o.ProductId = p.Id
+                GROUP BY p.Name
+                ORDER BY TotalSold ASC;
+            ";
+
+                    var result = new List<ProductSalesDto>();
+
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        using var reader = await command.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            var dto = new ProductSalesDto
+                            {
+                                ProductName = reader.GetString(reader.GetOrdinal("ProductName")),
+                                TotalSold = reader.GetInt32(reader.GetOrdinal("TotalSold"))
+                            };
+                            result.Add(dto);
+                        }
+                    }
+
+                    return result;
+                }
+            }
+            catch (SqlException e)
+            {
+                throw new DatabaseOperationException(Operations.GetProducts, e);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error getting DB connection{e}");
+            }
+        }
+
     }
 }

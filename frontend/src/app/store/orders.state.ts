@@ -4,7 +4,7 @@ import { OrdersService } from '../services/order-service/order.service';
 import {
   CreateOrder, CreateOrderFail, CreateOrderSuccess,
   GetOrders, GetOrdersFail, GetOrdersSuccess,
-  GetOrderDynamic, GetOrderDynamicFail, GetOrderDynamicSuccess,
+  GetOrderDynamic,
   UpdateOrder, UpdateOrderFail, UpdateOrderSuccess,
   DeleteOrder, DeleteOrderFail, DeleteOrderSuccess
 } from './orders.actions';

@@ -1,5 +1,5 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { CheckAuth, Login, LoginFail, LoginSuccess, Register, RegisterFail, RegisterSuccess, SetLoading, SetUser } from './app.actions';
+import { CheckAuth, Login, LoginFail, LoginSuccess, Logout, LogoutFail, LogoutSuccess, Register, RegisterFail, RegisterSuccess, SetLoading, SetUser } from './app.actions';
 import { AppStateModel, User, UserStateModel } from '../interfaces';
 import { Inject, Injectable } from '@angular/core';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBar } from '@angular/material/snack-bar';
@@ -81,7 +81,7 @@ export class UserState {
     }
 
     @Action(LoginSuccess)
-    loginSuccess(ctx: StateContext<UserStateModel>, {user}: LoginSuccess) {
+    loginSuccess(ctx: StateContext<UserStateModel>, { user }: LoginSuccess) {
         console.log(user);
         ctx.patchState({ currentUser: user });
         ctx.dispatch(new SetLoading(false));
@@ -131,4 +131,24 @@ export class UserState {
         ctx.patchState({ currentUser: action.payload });
     }
 
+    @Action(Logout)
+    logout(ctx: StateContext<UserStateModel>) {
+        ctx.patchState({ currentUser: null });
+        return this.authService.logout().pipe(tap(() => { ctx.dispatch(new LogoutSuccess()) }),
+            catchError((error) => {
+                ctx.dispatch(new LogoutFail());
+                return of(null);
+            }));
+    }
+
+    @Action(LogoutSuccess)
+    logoutSuccess(ctx: StateContext<UserStateModel>) {
+        this.router.navigate(['/login']);
+        this.snackBar.open('Ви успішно вийшли з аккаунту', 'Close', { panelClass: 'success-snackbar' });
+    }
+
+    @Action(LogoutFail)
+    logoutFail(ctx: StateContext<UserStateModel>) {
+        this.snackBar.open('Помилка виходу', 'Close', { panelClass: 'error-snackbar' });
+    }
 }

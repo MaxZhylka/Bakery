@@ -1,8 +1,11 @@
 
-namespace backend.Core.Models {
+namespace backend.Core.Models
+{
 
-  public class PaginationParameters{
-      public int From { get; set; }
-      public int Size { get; set; }
+  public class PaginationParameters
+  {
+    public int Size { get; set; }
+    public int Offset { get; set; }
+
   }
 }

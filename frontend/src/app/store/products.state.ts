@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { State, Action, StateContext, Store } from '@ngxs/store';
+import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { ProductsService } from '../services/product-service/product.service';
 import {
   GetProducts, GetProductsWhereCountMoreThan100, GetProductsWherePriceMoreThan250, GetProductsWhereCountMoreThan50AndPriceLessThan100,
@@ -30,6 +30,11 @@ export class ProductsState {
     private readonly store: Store,
     private readonly snackBar: MatSnackBar
   ) { }
+
+  @Selector()
+  static products(state: ProductsStateModel): DataByPagination<Product[]> {
+      return state.products;
+  }
 
   @Action(GetProducts)
   getProducts(ctx: StateContext<ProductsStateModel>, { paginationParams }: GetProducts) {
