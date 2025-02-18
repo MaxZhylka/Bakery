@@ -35,7 +35,13 @@ namespace Core.Attributes
         {
           StatusCode = StatusCodes.Status500InternalServerError
         },
-
+        Exception ex => new ObjectResult(new
+        {
+          error = ex.Message
+        })
+        {
+          StatusCode = StatusCodes.Status500InternalServerError
+        },
         _ => new ObjectResult(new { error = "An unexpected error occurred" })
         {
           StatusCode = StatusCodes.Status500InternalServerError

@@ -19,10 +19,10 @@ namespace backend.Core.Services
             return _mapper.Map<UserDTO>(user);
         }
 
-        public async Task<IEnumerable<UserDTO>> GetUsers()
+        public async Task<PaginatedResult<UserDTO>> GetUsers(PaginationParameters paginationParameters)
         {
-            var users = await _userRepository.GetUsersAsync();
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
+            return await _userRepository.GetUsersAsync(paginationParameters);
+
         }
 
         public async Task<UserDTO> DeleteUser(Guid id)

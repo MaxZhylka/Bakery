@@ -26,7 +26,7 @@ export class CreateProductComponent {
     this.form = this.fb.group({
       name: [data?.name ?? '', Validators.required],
       price: [data?.price ?? '', [Validators.required, Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]],
-      count: [data?.count ?? '', [Validators.required, Validators.min(1)]],
+      count: [data?.productCount ?? '', [Validators.required, Validators.min(1)]],
     });
   }
 

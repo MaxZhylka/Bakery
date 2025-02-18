@@ -50,7 +50,14 @@ export class SetUser {
     constructor(public payload: User) {}
 }
 
-export class LoadMoreMessages {
-    static readonly type = '[Chat] Load More Messages';
-    constructor(public chatId: number, public paginationValue: number) {}
+export class Logout {
+    static readonly type = '[Auth] Logout';
+}
+
+export class LogoutSuccess {
+    static readonly type = '[Auth] Logout success';
+}
+
+export class LogoutFail {
+    static readonly type = '[Auth] Logout fail';
 }

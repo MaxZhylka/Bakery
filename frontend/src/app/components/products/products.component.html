@@ -9,7 +9,7 @@
           <mat-option *ngFor="let request of requestTypes" [value]="request">{{request}}</mat-option>
       </mat-select>
     </mat-form-field>
-  <button (click)="createProduct()" mat-fab extended> Створити продукт <mat-icon>cake_add</mat-icon></button>
+  <button *ngIf="userData?.role === role.Admin || userData?.role === role.Manager" (click)="createProduct()" mat-fab extended> Створити продукт <mat-icon>cake_add</mat-icon></button>
 </div>
 </div>
 <div class="m-5 p-5 flex border flex-col justify-center mat-elevation-z8">
@@ -27,7 +27,7 @@
 
     <ng-container matColumnDef="count">
       <th mat-header-cell *matHeaderCellDef> Кількість </th>
-      <td mat-cell *matCellDef="let element"> {{ element.count }} </td>
+      <td mat-cell *matCellDef="let element"> {{ element.productCount }} </td>
     </ng-container>
 
     <ng-container matColumnDef="createdAt">
@@ -40,10 +40,10 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> Дії </th>
       <td mat-cell *matCellDef="let element">
-        <button mat-icon-button matTooltip="Редагувати" (click)="editProduct(element)">
+        <button *ngIf="userData?.role === role.Admin || userData?.role === role.Manager" mat-icon-button matTooltip="Редагувати" (click)="editProduct(element)">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button matTooltip="Видалити" (click)="deleteProduct(element)">
+        <button *ngIf="userData?.role === role.Admin || userData?.role === role.Manager" mat-icon-button matTooltip="Видалити" (click)="deleteProduct(element)">
           <mat-icon>delete</mat-icon>
         </button>
         <button mat-icon-button matTooltip="Замовити" (click)="createOrder(element)">
@@ -57,6 +57,7 @@
   </table>
 
   <mat-paginator
+    [length]=""
     [pageSize]="paginationParams.size"
     [pageSizeOptions]="[5, 10, 20]"
     (page)="onPageChange($event)">

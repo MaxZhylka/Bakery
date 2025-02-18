@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card'
+import { Store } from '@ngxs/store';
+import { Logout } from '../../store/app.actions';
 
 @Component({
   selector: 'app-cabinet',
@@ -11,4 +13,9 @@ import { MatCardModule } from '@angular/material/card'
 })
 export class CabinetComponent {
 
+  constructor(private readonly store: Store) {}
+
+  public logout(): void {
+    this.store.dispatch(new Logout());
+  }
 }

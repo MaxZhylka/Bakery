@@ -45,6 +45,4 @@ export class LogsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public deleteLog(event: Event) { };
-  public editLog(event: Event) { };
 }

@@ -6,17 +6,21 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 
-namespace backend.Core.Services 
+namespace backend.Core.Services
 {
     public class ProductsService(IProductRepository productsRepository, IMapper mapper) : IProductsService
     {
         private readonly IProductRepository _productsRepository = productsRepository;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<IEnumerable<ProductDTO>> GetProducts()
+        public async Task<PaginatedResult<ProductEntity>> GetProducts(PaginationParameters paginationParameters)
         {
-            IEnumerable<ProductEntity> products = await _productsRepository.GetProductsAsync();
-            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return  await _productsRepository.GetProductsAsync(paginationParameters);
+        }
+
+        public async Task<PaginatedResult<ProductEntity>> GetProductsByValues(int count, bool directionCount, double price, bool directionPrice, PaginationParameters paginationParams)
+        {
+            return await _productsRepository.GetProductsByValuesAsync(count, directionCount, price, directionPrice, paginationParams);
         }
 
         public async Task<ProductDTO> GetProduct(Guid id)
@@ -44,6 +48,10 @@ namespace backend.Core.Services
         {
             var deletedProduct = await _productsRepository.DeleteProductAsync(id);
             return _mapper.Map<ProductDTO>(deletedProduct);
+        }
+
+        public async Task<IEnumerable<ProductSalesDto>> GetProductSales() {
+            return await _productsRepository.GetProductSalesAsync();
         }
     }
 }
