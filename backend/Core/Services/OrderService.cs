@@ -27,7 +27,7 @@ namespace backend.Core.Services
             return _mapper.Map<OrderDTO>(order);
         }
 
-        public async Task<OrderDTO> CreateOrder(OrderDTO order)
+        public async Task<OrderDTO> CreateOrder(OrderEntity order)
         {
             var orderEntity = _mapper.Map<OrderEntity>(order);
             orderEntity.Id = Guid.NewGuid();

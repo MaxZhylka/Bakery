@@ -16,15 +16,15 @@ namespace backend.API.Controllers
     [ErrorHandler]
     [Authorize(Roles = "Admin,Manager,User")]
     [HttpGet]
-    public async Task<PaginatedResult<OrderDTO>> GetOrders(PaginationParameters paginationParameters)
+    public async Task<PaginatedResult<OrderDTO>> GetOrders([FromQuery] PaginationParameters paginationParameters)
     {
       return await _orderService.GetOrders(paginationParameters);
     }
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("ByUserId")]
-    public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserId(PaginationParameters paginationParameters, Guid userId)
+    [Authorize(Roles = "Admin,Manager,User")]
+    [HttpGet("ByUserId/{userId}")]
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserId([FromQuery] PaginationParameters paginationParameters, Guid userId)
     {
       return await _orderService.GetOrdersByUserId(paginationParameters, userId);
     }
@@ -40,7 +40,7 @@ namespace backend.API.Controllers
     [ErrorHandler]
     [Authorize(Roles = "Admin,Manager,User")]
     [HttpPost]
-    public async Task<OrderDTO> CreateOrder([FromBody] OrderDTO order)
+    public async Task<OrderDTO> CreateOrder([FromBody] OrderEntity order)
     {
       return await _orderService.CreateOrder(order);
     }

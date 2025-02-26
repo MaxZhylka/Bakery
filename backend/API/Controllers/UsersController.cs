@@ -31,7 +31,7 @@ public class UsersController(IUserService userService) : ControllerBase
   [ErrorHandler]
   [Authorize(Roles = "Admin,Manager")]
   [HttpGet]
-  public async Task<PaginatedResult<UserDTO>> GetUsers(PaginationParameters paginationParameters)
+  public async Task<PaginatedResult<UserDTO>> GetUsers([FromQuery] PaginationParameters paginationParameters)
   {
     return await _userService.GetUsers(paginationParameters);
   }

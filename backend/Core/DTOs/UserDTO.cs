@@ -11,6 +11,7 @@ namespace backend.Core.DTOs
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public required UserRole Role { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public string? AccessToken { get; set; }
   }

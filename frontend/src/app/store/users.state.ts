@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { State, Action, StateContext, Store } from '@ngxs/store';
+import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { UsersService } from '../services/user-service/user.service';
 import {
   GetUsers, GetUsersSuccess, GetUsersFail,
@@ -34,6 +34,12 @@ export class UsersState {
     private readonly store: Store
   ) { }
 
+  @Selector()
+  static users(state: UsersStateModel): DataByPagination<User[]> {
+    return state.users;
+  }
+  
+
   @Action(GetUsers)
   getUsers(ctx: StateContext<UsersStateModel>, { paginationParams }: GetUsers) {
     this.store.dispatch(new SetLoading(true));
@@ -60,11 +66,11 @@ export class UsersState {
   }
 
   @Action(CreateUser)
-  createUser(ctx: StateContext<UsersStateModel>, { user }: CreateUser) {
+  createUser(ctx: StateContext<UsersStateModel>, { user, paginationParams }: CreateUser) {
     this.store.dispatch(new SetLoading(true));
     return this.usersService.createUser(user).pipe(
       tap((createdUser: User) => {
-        ctx.dispatch(new CreateUserSuccess(createdUser));
+        ctx.dispatch(new CreateUserSuccess(createdUser, paginationParams));
         this.snackBar.open('Користувача створено успішно', 'Закрити', { duration: 3000 });
       }),
       catchError((error) => {
@@ -77,11 +83,8 @@ export class UsersState {
   }
 
   @Action(CreateUserSuccess)
-  createUserSuccess(ctx: StateContext<UsersStateModel>, { user }: CreateUserSuccess) {
-    const state = ctx.getState();
-    ctx.patchState({
-      users: { data: [...state.users.data, user], total: state.users.total+1 }
-    });
+  createUserSuccess(ctx: StateContext<UsersStateModel>, { paginationParams }: CreateUserSuccess) {
+    this.store.dispatch(new GetUsers(paginationParams))
   }
 
   @Action(CreateUserFail)
@@ -90,11 +93,11 @@ export class UsersState {
   }
 
   @Action(UpdateUser)
-  updateUser(ctx: StateContext<UsersStateModel>, { user }: UpdateUser) {
+  updateUser(ctx: StateContext<UsersStateModel>, { user, paginationParams }: UpdateUser) {
     this.store.dispatch(new SetLoading(true));
     return this.usersService.updateUser(user).pipe(
       tap((updatedUser: User) => {
-        ctx.dispatch(new UpdateUserSuccess(updatedUser));
+        ctx.dispatch(new UpdateUserSuccess(updatedUser, paginationParams));
         this.snackBar.open('Дані користувача оновлено', 'Закрити', { duration: 3000 });
       }),
       catchError((error) => {
@@ -107,10 +110,8 @@ export class UsersState {
   }
 
   @Action(UpdateUserSuccess)
-  updateUserSuccess(ctx: StateContext<UsersStateModel>, { user }: UpdateUserSuccess) {
-    const state = ctx.getState();
-    const users = state.users.data.map(u => u.id === user.id ? user : u);
-    ctx.patchState({ users: {data: users, total: state.users.total} });
+  updateUserSuccess(ctx: StateContext<UsersStateModel>, { paginationParams }: UpdateUserSuccess) {
+    this.store.dispatch(new GetUsers(paginationParams))
   }
 
   @Action(UpdateUserFail)

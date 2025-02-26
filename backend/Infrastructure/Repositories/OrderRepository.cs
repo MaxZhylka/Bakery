@@ -1,9 +1,9 @@
-using Microsoft.Data.SqlClient;
+using backend.Core.DTOs;
+using backend.Core.Enums;
 using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 using Core.Exceptions;
-using backend.Core.Enums;
-using backend.Core.DTOs;
+using Microsoft.Data.SqlClient;
 
 
 namespace backend.Infrastructure.Repositories
@@ -28,12 +28,14 @@ namespace backend.Infrastructure.Repositories
           }
 
           string itemsQuery = @"
-                        SELECT Id, ProductId, CustomerName, ProductCount, Price, CreatedAt
-                        FROM Orders
-                        ORDER BY CreatedAt DESC
-                        OFFSET @Offset ROWS
-                        FETCH NEXT @PageSize ROWS ONLY
-                    ";
+                SELECT o.Id, o.ProductId, p.Name AS ProductName, u.Name, o.ProductCount, o.Price, o.CreatedAt
+                FROM Orders o
+                JOIN Products p ON o.ProductId = p.Id
+                Join Users u On o.CustomerId = u.Id
+                ORDER BY o.CreatedAt DESC
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+            ";
 
           var items = new List<OrderDTO>();
 
@@ -50,10 +52,11 @@ namespace backend.Infrastructure.Repositories
               {
                 Id = reader.GetGuid(0),
                 ProductId = reader.GetGuid(1),
-                CustomerName = reader.GetString(2),
-                ProductCount = reader.GetInt32(3),
-                Price = reader.GetDecimal(4),
-                CreatedAt = reader.GetDateTime(5)
+                ProductName = reader.GetString(2),
+                CustomerName = reader.GetString(3),
+                ProductCount = reader.GetInt32(4),
+                Price = reader.GetDecimal(5),
+                CreatedAt = reader.GetDateTime(6)
               };
               items.Add(product);
             }
@@ -88,7 +91,7 @@ namespace backend.Infrastructure.Repositories
           const string countQuery = @"
                 SELECT COUNT(*) 
                 FROM Orders
-                WHERE UserId = @UserId
+                WHERE CustomerId = @UserId
             ";
           int totalCount;
           using (var countCommand = new SqlCommand(countQuery, connection))
@@ -98,10 +101,12 @@ namespace backend.Infrastructure.Repositories
           }
 
           string itemsQuery = @"
-                SELECT Id, ProductId, CustomerName, ProductCount, Price, CreatedAt
-                FROM Orders
-                WHERE UserId = @UserId
-                ORDER BY CreatedAt DESC
+                SELECT o.Id, o.ProductId, p.Name AS ProductName, u.Name, o.ProductCount, o.Price, o.CreatedAt
+                FROM Orders o
+                JOIN Products p ON o.ProductId = p.Id
+                Join Users u ON o.CustomerId = u.Id
+                WHERE CustomerId = @UserId
+                ORDER BY o.CreatedAt DESC
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY
             ";
@@ -122,10 +127,11 @@ namespace backend.Infrastructure.Repositories
               {
                 Id = reader.GetGuid(0),
                 ProductId = reader.GetGuid(1),
-                CustomerName = reader.GetString(2),
-                ProductCount = reader.GetInt32(3),
-                Price = reader.GetDecimal(4),
-                CreatedAt = reader.GetDateTime(5)
+                ProductName = reader.GetString(2),
+                CustomerName = reader.GetString(3),
+                ProductCount = reader.GetInt32(4),
+                Price = reader.GetDecimal(5),
+                CreatedAt = reader.GetDateTime(6)
               };
               items.Add(orderDto);
             }
@@ -159,7 +165,7 @@ namespace backend.Infrastructure.Repositories
 
           OrderEntity? order = null;
 
-          var query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerName FROM Orders WHERE Id = @Id";
+          var query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerId FROM Orders WHERE Id = @Id";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Id", id);
@@ -174,7 +180,7 @@ namespace backend.Infrastructure.Repositories
                 ProductCount = reader.GetInt32(2),
                 Price = reader.GetDecimal(3),
                 CreatedAt = reader.GetDateTime(4),
-                CustomerName = reader.GetString(5)
+                CustomerId = reader.GetGuid(5)
               };
             }
           }
@@ -204,9 +210,9 @@ namespace backend.Infrastructure.Repositories
           await connection.OpenAsync();
 
           var query = @"
-            INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerName) 
-            OUTPUT INSERTED.Id 
-            VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerName)";
+        INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerId) 
+        OUTPUT INSERTED.Id, INSERTED.ProductId, INSERTED.ProductCount, INSERTED.Price, INSERTED.CreatedAt, INSERTED.CustomerId
+        VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerId)";
 
           using (var command = new SqlCommand(query, connection))
           {
@@ -214,13 +220,25 @@ namespace backend.Infrastructure.Repositories
             command.Parameters.AddWithValue("@ProductId", order.ProductId);
             command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
             command.Parameters.AddWithValue("@Price", order.Price);
-            command.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
-            command.Parameters.AddWithValue("@CustomerName", order.CustomerName);
+            command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+            command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
 
-            await command.ExecuteScalarAsync();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+              if (await reader.ReadAsync())
+              {
+                return new OrderEntity
+                {
+                  Id = reader.GetGuid(0),
+                  ProductId = reader.GetGuid(1),
+                  ProductCount = reader.GetInt32(2),
+                  Price = reader.GetDecimal(3),
+                  CreatedAt = reader.GetDateTime(4),
+                  CustomerId = reader.GetGuid(5)
+                };
+              }
+            }
           }
-
-          return await GetOrderAsync(order.Id, connection);
         }
       }
       catch (SqlException e)
@@ -231,6 +249,7 @@ namespace backend.Infrastructure.Repositories
       {
         throw new Exception($"Error getting DB connection{e}");
       }
+      throw new Exception("Unexpected inserting error");
     }
 
     public async Task<OrderEntity> UpdateOrderAsync(Guid id, OrderEntity order)
@@ -247,7 +266,7 @@ namespace backend.Infrastructure.Repositories
                 ProductCount = @ProductCount,
                 Price = @Price,
                 CreatedAt = @CreatedAt,
-                CustomerName = @CustomerName
+                CustomerId= @CustomerId
             WHERE Id = @Id";
 
           using (var command = new SqlCommand(query, connection))
@@ -257,7 +276,7 @@ namespace backend.Infrastructure.Repositories
             command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
             command.Parameters.AddWithValue("@Price", order.Price);
             command.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
-            command.Parameters.AddWithValue("@CustomerName", order.CustomerName);
+            command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             if (rowsAffected == 0)

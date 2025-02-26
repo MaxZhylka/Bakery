@@ -9,7 +9,7 @@ namespace backend.Core.Models
     public required int ProductCount { get; set; }
     public required decimal Price { get; set; }
     public DateTime CreatedAt { get; set; }
-    public required string CustomerName { get; set; }
+    public required Guid CustomerId { get; set; }
   }
 
 }

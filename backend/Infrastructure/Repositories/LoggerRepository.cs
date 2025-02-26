@@ -72,6 +72,7 @@ namespace backend.Infrastructure.Repositories
                         l.UserId,
                         u.UserName,
                         u.Email,
+                        u.Role,
                         l.Operation,
                         l.Details,
                         l.Timestamp
@@ -93,9 +94,10 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                     results.Add(dto);
                 }
@@ -132,8 +134,9 @@ namespace backend.Infrastructure.Repositories
             SELECT 
                 l.Id,
                 l.UserId,
-                u.UserName,
+                u.Name,
                 u.Email,
+                u.Role,
                 l.Operation,
                 l.Details,
                 l.Timestamp
@@ -156,9 +159,10 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                     results.Add(dto);
                 }
@@ -195,6 +199,7 @@ namespace backend.Infrastructure.Repositories
                         l.UserId,
                         u.UserName,
                         u.Email,
+                        u.Role,
                         l.Operation,
                         l.Details,
                         l.Timestamp
@@ -214,9 +219,10 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                 }
 

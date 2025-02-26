@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DataByPagination, PaginationParams, Product } from '../../interfaces';
+import { DataByPagination, PaginationParams, Product, ProductSales } from '../../interfaces';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -36,7 +36,11 @@ export class ProductsService {
     return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product);
   }
 
-  deleteProduct(productId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${productId}`);
+  deleteProduct(productId: string): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/${productId}`);
+  }
+
+  getProductsSales(): Observable<ProductSales[]> {
+    return this.http.get<ProductSales[]>(`${this.apiUrl}/Sales`);
   }
 }

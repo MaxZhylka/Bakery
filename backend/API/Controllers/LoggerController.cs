@@ -16,7 +16,7 @@ namespace backend.API.Controllers
     [ErrorHandler]
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
-    public async Task<PaginatedResult<UserActionDTO>> GetAllLogs(PaginationParameters parameters)
+    public async Task<PaginatedResult<UserActionDTO>> GetAllLogs([FromQuery] PaginationParameters parameters)
     {
       return await _loggerService.GetAllLogs(parameters);
     }
@@ -31,7 +31,7 @@ namespace backend.API.Controllers
 
     
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpGet("/ByUserId/{userId}")]
     public async Task<UserActionDTO[]> GetLogByUserId(Guid userId)
     {

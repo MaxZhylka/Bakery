@@ -82,7 +82,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   public deleteProduct(product: Product) {
-    this.store.dispatch(new DeleteProduct(product.id));
+    this.store.dispatch(new DeleteProduct(product.id, this.paginationParams));
   };
 
   public getNewData(event: MatSelectChange): void {
@@ -108,7 +108,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: Product | undefined) => {
       if (result) {
-        this.store.dispatch(new CreateProduct(result));
+        this.store.dispatch(new CreateProduct(result, this.paginationParams));
       }
     });
   }
@@ -122,7 +122,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: Product | undefined) => {
       if (result) {
-        this.store.dispatch(new UpdateProduct(result));
+        this.store.dispatch(new UpdateProduct(result, this.paginationParams));
       }
     });
   }

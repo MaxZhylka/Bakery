@@ -26,5 +26,7 @@ export class OrdersService {
     return this.http.delete<Order>(`${this.apiUrl}/${orderId}`);
   }
 
-  public getOrderDynamic(): void { };
+  public getOrdersByUserId(userId: string, params: PaginationParams): Observable<DataByPagination<Order[]>> {
+    return this.http.get<DataByPagination<Order[]>>(`${this.apiUrl}/ByUserId/${userId}`, { params: { ...params } });
+  }
 }

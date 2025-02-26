@@ -30,20 +30,6 @@ export class CreateOrderFail {
   constructor(public error: string) {}
 }
 
-export class GetOrderDynamic {
-  static readonly type = '[Orders] Get order dynamic';
-}
-
-export class GetOrderDynamicSuccess {
-  static readonly type = '[Orders] Get order dynamic success';
-  constructor(public dynamicData: any) {}
-}
-
-export class GetOrderDynamicFail {
-  static readonly type = '[Orders] Get order dynamic fail';
-  constructor(public error: string) {}
-}
-
 export class UpdateOrder {
   static readonly type = '[Orders] Update order';
   constructor(public orderId: string, public updateData: IUpdateOrder) {}
@@ -71,3 +57,9 @@ export class DeleteOrderFail {
   static readonly type = '[Orders] Delete order fail';
   constructor(public error: string) {}
 }
+
+export class GetOrdersByUserId {
+  static readonly type = '[Orders] Get orders by user id';
+  constructor(public paginationParams: PaginationParams, public userId: string) {}
+}
+

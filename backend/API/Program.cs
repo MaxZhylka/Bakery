@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.Core.Middlewares;
+using QuestPDF.Infrastructure;
+using QuestPDF.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -19,6 +21,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+using var _customFontStream = new MemoryStream(File.ReadAllBytes("./API/Fonts/OpenSans_Condensed-Light.ttf"));
+FontManager.RegisterFont(_customFontStream);
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -28,6 +33,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILoggerService, LoggerService>();
 builder.Services.AddScoped<ILoggerRepository, LoggerRepository>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentityServer();
 builder.Services.AddScoped<IAuthService, AuthService>();

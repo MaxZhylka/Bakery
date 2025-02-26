@@ -12,6 +12,8 @@ import { ProductsState } from './store/products.state';
 import { OrdersState } from './store/orders.state';
 import { LogsState } from './store/logs.state';
 import { authInterceptor } from './interceptors/authInterceptor';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { UsersState } from './store/users.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,9 +21,13 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     importProvidersFrom(
-      NgxsModule.forRoot([UserState, AppState, ProductsState, OrdersState, LogsState]),
+      NgxsModule.forRoot([UserState, AppState, ProductsState, OrdersState, LogsState, UsersState]),
       NgxsReduxDevtoolsPluginModule.forRoot(),
       NgxsLoggerPluginModule.forRoot()
-    )
+    ),
+    {
+      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+      useValue: { verticalPosition: 'top', horizontalPosition: 'center' }
+    }
   ],
 };

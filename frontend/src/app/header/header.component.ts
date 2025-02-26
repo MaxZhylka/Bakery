@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { Store } from '@ngxs/store';
 import { UserState } from '../store/app.state';
-import { filter, Observable, take, takeUntil } from 'rxjs';
+import { filter, Observable, Subject, take, takeUntil } from 'rxjs';
 import { Roles, User } from '../interfaces';
 
 @Component({
@@ -27,9 +27,10 @@ import { Roles, User } from '../interfaces';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   isMobile = window.innerWidth < 768;
   user$!: Observable<User | null>;
+  destroy$: Subject<void> = new Subject();
   userData!: User | null;
   roles = Roles;
 
@@ -42,11 +43,16 @@ export class HeaderComponent implements OnInit {
 
   public ngOnInit(): void {
     this.user$ = this.store.select(UserState.currentUser);
-    this.user$.pipe(filter((user)=>Boolean(user)), take(1)).subscribe((user)=>this.userData = user);
+    this.user$.pipe(filter((user)=>Boolean(user)), takeUntil(this.destroy$)).subscribe((user)=>this.userData = user);
   }
 
   public displayHeader(): boolean {
     const currentUrl = this.router.url;
     return !(currentUrl.includes('login') || currentUrl.includes('registration'));
+  }
+
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

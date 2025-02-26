@@ -281,36 +281,50 @@ namespace backend.Infrastructure.Repositories
             }
         }
 
-        public async Task<ProductEntity> DeleteProductAsync(Guid id)
+public async Task<ProductEntity> DeleteProductAsync(Guid id)
+{
+    try
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
+
+        var query = @"
+            DELETE FROM Products 
+            OUTPUT DELETED.Id, DELETED.Name, DELETED.Price, DELETED.ProductCount
+            WHERE Id = @Id";
+
+        using (var command = new SqlCommand(query, connection))
         {
-            try
+            command.Parameters.AddWithValue("@Id", id);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                using var connection = _connectionFactory.CreateConnection();
-                if (connection.State != System.Data.ConnectionState.Open)
-                    await connection.OpenAsync();
-
-                var product = await GetProductAsync(id, connection);
-
-                var query = "DELETE FROM Products WHERE Id = @Id";
-                using (var command = new SqlCommand(query, connection))
+                return new ProductEntity
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
-                    if (rowsAffected == 0)
-                        throw new KeyNotFoundException($"Product with ID {id} was not found for deletion");
-                }
-
-                return product;
+                    Id = reader.GetGuid(0),
+                    Name = reader.GetString(1),
+                    Price = reader.GetDecimal(2),
+                    ProductCount = reader.GetInt32(3)
+                };
             }
-            catch (SqlException e)
+            else
             {
-                throw new DatabaseOperationException(Operations.DeleteProduct, e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Error getting DB connection{e}");
+                throw new KeyNotFoundException($"Product with ID {id} was not found for deletion");
             }
         }
+    }
+    catch (SqlException e)
+    {
+        throw new DatabaseOperationException(Operations.DeleteProduct, e);
+    }
+    catch (Exception e)
+    {
+        throw new Exception($"Error getting DB connection {e}");
+    }
+}
+
 
         public async Task<IEnumerable<ProductSalesDto>> GetProductSalesAsync()
         {
@@ -324,9 +338,9 @@ namespace backend.Infrastructure.Repositories
                     string query = @"
                 SELECT 
                     p.Name AS ProductName,
-                    SUM(o.ProductCount) AS TotalSold
+                    COALESCE(SUM(o.ProductCount), 0) AS TotalSold
                 FROM Orders o
-                JOIN Products p ON o.ProductId = p.Id
+                RIGHT JOIN Products p ON o.ProductId = p.Id
                 GROUP BY p.Name
                 ORDER BY TotalSold ASC;
             ";

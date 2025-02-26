@@ -21,15 +21,19 @@ export class GetProductsWhereCountMoreThan50AndPriceLessThan100 {
 
 export class CreateProduct {
     static readonly type = '[Product] Create Product';
-    constructor(public product: Product) { }
+    constructor(public product: Product, public paginationParams: PaginationParams) { }
 }
 
 export class UpdateProduct {
     static readonly type = '[Product]  Update Product';
-    constructor(public product: Product) { }
+    constructor(public product: Product, public  paginationParams: PaginationParams) { }
 }
 
 export class DeleteProduct {
     static readonly type = '[Product] Delete Product';
-    constructor(public productId: string) { }
+    constructor(public productId: string, public  paginationParams: PaginationParams) { }
+}
+
+export class GetProductsSales {
+    static readonly type = '[Product] Get Products Sales';
 }

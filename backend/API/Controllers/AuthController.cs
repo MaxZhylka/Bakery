@@ -113,6 +113,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     };
   }
 
+  [Authorize]
   [ErrorHandler]
   [HttpGet("Logout")]
   public async Task<IActionResult> Logout()

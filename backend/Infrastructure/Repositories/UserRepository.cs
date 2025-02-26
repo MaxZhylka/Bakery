@@ -1,11 +1,10 @@
-using Microsoft.Data.SqlClient;
-using backend.Infrastructure.Interfaces;
-
 using backend.Core.DTOs;
 using backend.Core.Enums;
+using backend.Core.Models;
+using backend.Infrastructure.Interfaces;
 using Core.Exceptions;
 using Microsoft.CodeAnalysis.Emit;
-using backend.Core.Models;
+using Microsoft.Data.SqlClient;
 
 
 namespace backend.Infrastructure.Repositories
@@ -58,7 +57,7 @@ namespace backend.Infrastructure.Repositories
       {
         throw new DatabaseOperationException(Operations.GetUser, e);
       }
-     catch (Exception e)
+      catch (Exception e)
       {
         throw new Exception($"Error getting DB connection{e}");
       }
@@ -81,7 +80,8 @@ namespace backend.Infrastructure.Repositories
                 Id, 
                 Name, 
                 Email, 
-                Role 
+                Role,
+                CreatedAt
             FROM Users
             ORDER BY Name ASC
             OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
@@ -99,7 +99,8 @@ namespace backend.Infrastructure.Repositories
             Id = reader.GetGuid(0),
             Name = reader.GetString(1),
             Email = reader.GetString(2),
-            Role = Enum.Parse<UserRole>(reader.GetString(3))
+            Role = Enum.Parse<UserRole>(reader.GetString(3)),
+            CreatedAt = reader.GetDateTime(4)
           });
         }
 
@@ -113,7 +114,7 @@ namespace backend.Infrastructure.Repositories
       {
         throw new DatabaseOperationException(Operations.GetUsers, e);
       }
-     catch (Exception e)
+      catch (Exception e)
       {
         throw new Exception($"Error getting DB connection{e}");
       }
@@ -145,7 +146,7 @@ namespace backend.Infrastructure.Repositories
       {
         throw new DatabaseOperationException(Operations.DeleteUser, e);
       }
-     catch (Exception e)
+      catch (Exception e)
       {
         throw new Exception($"Error getting DB connection{e}");
       }
@@ -186,7 +187,7 @@ namespace backend.Infrastructure.Repositories
       {
         throw new DatabaseOperationException(Operations.UpdateUser, e);
       }
-     catch (Exception e)
+      catch (Exception e)
       {
         throw new Exception($"Error getting DB connection{e}");
       }

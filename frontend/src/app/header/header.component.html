@@ -8,6 +8,7 @@
     <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" routerLink="/users" mat-button>Користувачі</a>
     <a *ngIf="userData.role === roles.Admin" routerLink="/logs" mat-button>Журнал</a>
     <a routerLink="/orders" mat-button>Замовлення</a>
+    <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-button routerLink="/products/dynamic">Динаміка продуктів</a>
     <a routerLink="/products" mat-button>Продукти</a>
   </div>
 
@@ -32,6 +33,7 @@
     <button *ngIf="userData.role === roles.Admin" mat-menu-item routerLink="/logs">Журнал</button>
     <button mat-menu-item routerLink="/orders">Замовлення</button>
     <button mat-menu-item routerLink="/products">Продукти</button>
+    <button *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-menu-item routerLink="/products/dynamic">Продукти</button>
     <button mat-menu-item routerLink="/cabinet">Кабінет</button>
   </mat-menu>
 </mat-toolbar>

@@ -22,7 +22,7 @@
 
   <mat-form-field class="w-[300px] self-center" appearance="fill">
     <mat-label>Кількість</mat-label>
-    <input matInput formControlName="count" type="number" required>
+    <input matInput formControlName="productCount" type="number" required>
     <mat-error *ngIf="form.get('count')?.hasError('required')">
       Вкажіть кількість продукту.
     </mat-error>
@@ -31,7 +31,7 @@
     </mat-error>
   </mat-form-field>
 
-  <div class="dialog-actions self-center">
+  <div class="w-[100%] flex justify-center gap-2">
     <button mat-button type="button" (click)="onCancel()">Скасувати</button>
     <button mat-flat-button color="primary" type="submit">{{ isEditMode ? 'Зберегти' : 'Створити' }}</button>
   </div>

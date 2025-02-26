@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { State, Action, StateContext, Store } from '@ngxs/store';
+import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { OrdersService } from '../services/order-service/order.service';
 import {
   CreateOrder, CreateOrderFail, CreateOrderSuccess,
   GetOrders, GetOrdersFail, GetOrdersSuccess,
-  GetOrderDynamic,
   UpdateOrder, UpdateOrderFail, UpdateOrderSuccess,
-  DeleteOrder, DeleteOrderFail, DeleteOrderSuccess
+  DeleteOrder, DeleteOrderFail, DeleteOrderSuccess,
+  GetOrdersByUserId
 } from './orders.actions';
 import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -38,6 +38,11 @@ export class OrdersState {
     private readonly store: Store
   ) { }
 
+  @Selector()
+  static orders(state: OrdersStateModel): DataByPagination<Order[]> {
+    return state.orders;
+  }
+
   @Action(GetOrders)
   getOrders(ctx: StateContext<OrdersStateModel>, { paginationParams }: GetOrders) {
     this.store.dispatch(new SetLoading(true));
@@ -50,7 +55,7 @@ export class OrdersState {
       tap(() => this.store.dispatch(new SetLoading(false)))
     );
   }
-  
+
   @Action(CreateOrder)
   createOrder(ctx: StateContext<OrdersStateModel>, { orderData }: CreateOrder) {
     this.store.dispatch(new SetLoading(true));
@@ -134,8 +139,16 @@ export class OrdersState {
     this.snackBar.open('Помилка видалення замовлення', 'Закрити', { duration: 3000 });
   }
 
-  @Action(GetOrderDynamic)
-  getOrderDynamic(ctx: StateContext<OrdersStateModel>) {
-    this.ordersService.getOrderDynamic();
+  @Action(GetOrdersByUserId)
+  getOrdersByUserId(ctx: StateContext<OrdersStateModel>, { paginationParams, userId }: GetOrdersByUserId) {
+    this.store.dispatch(new SetLoading(true));
+    return this.ordersService.getOrdersByUserId(userId, paginationParams).pipe(
+      tap((orders) => ctx.dispatch(new GetOrdersSuccess(orders))),
+      catchError((error) => {
+        ctx.dispatch(new GetOrdersFail(error.message));
+        return of();
+      }),
+      tap(() => this.store.dispatch(new SetLoading(false)))
+    );
   }
 }
