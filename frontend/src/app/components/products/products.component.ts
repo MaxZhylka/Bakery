@@ -136,7 +136,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: ICreateOrder) => {
       if (result) {
-        this.store.dispatch(new CreateOrder(result));
+        this.store.dispatch(new CreateOrder(result, this.paginationParams));
       }
     });
   }

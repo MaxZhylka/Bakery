@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using backend.Core.Interfaces;
-using backend.Core.DTOs;
 using System.Threading.Tasks;
+using backend.Core.DTOs;
+using backend.Core.Interfaces;
+using backend.Core.Models;
 using Core.Attributes;
 using Microsoft.AspNetCore.Authorization;
-using backend.Core.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.API.Controllers
 {
@@ -25,14 +25,14 @@ namespace backend.API.Controllers
         [ErrorHandler]
         [Authorize(Roles = "Admin,Manager,User")]
         [HttpGet("GetByValues")]
-        public async Task<PaginatedResult<ProductEntity>> GetProductsByValues([FromBody] ProductFilterDto productFilter)
+        public async Task<PaginatedResult<ProductEntity>> GetProductsByValues([FromQuery] ProductFilterDto productFilter)
         {
             return await _productsService.GetProductsByValues(
                 productFilter.Count,
                 productFilter.DirectionCount,
                 productFilter.Price,
                 productFilter.DirectionPrice,
-                productFilter.PaginationParams);
+                new PaginationParameters { Size = productFilter.Size, Offset = productFilter.Offset });
         }
 
         [ErrorHandler]

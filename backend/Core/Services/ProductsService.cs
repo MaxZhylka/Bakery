@@ -18,7 +18,7 @@ namespace backend.Core.Services
             return  await _productsRepository.GetProductsAsync(paginationParameters);
         }
 
-        public async Task<PaginatedResult<ProductEntity>> GetProductsByValues(int count, bool directionCount, double price, bool directionPrice, PaginationParameters paginationParams)
+        public async Task<PaginatedResult<ProductEntity>> GetProductsByValues(int? count, bool? directionCount, double? price, bool? directionPrice, PaginationParameters paginationParams)
         {
             return await _productsRepository.GetProductsByValuesAsync(count, directionCount, price, directionPrice, paginationParams);
         }

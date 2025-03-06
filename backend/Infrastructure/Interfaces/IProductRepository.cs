@@ -8,7 +8,7 @@ namespace backend.Infrastructure.Interfaces
     {
         Task<PaginatedResult<ProductEntity>> GetProductsAsync(PaginationParameters paginationParameters, SqlConnection? connection = null);
 
-        Task<PaginatedResult<ProductEntity>> GetProductsByValuesAsync(int count, bool directionCount, double price, bool directionPrice, PaginationParameters paginationParams);
+        Task<PaginatedResult<ProductEntity>> GetProductsByValuesAsync(int? count, bool? directionCount, double? price, bool? directionPrice, PaginationParameters paginationParams);
         Task<ProductEntity> GetProductAsync(Guid id, SqlConnection? connection = null);
         Task<ProductEntity> CreateProductAsync(ProductEntity product);
         Task<ProductEntity> UpdateProductAsync(Guid id, ProductEntity product);

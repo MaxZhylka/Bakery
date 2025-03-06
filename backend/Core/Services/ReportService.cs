@@ -16,7 +16,6 @@ namespace backend.Core.Services
     public async Task<byte[]> GenerateProductReportAsync()
     {
       var reportData = await _reportRepository.GetReportByProductAsync();
-      var chartImageByteArray = GenerateChart(reportData);
 
       var document = Document.Create(container =>
       {
@@ -28,7 +27,7 @@ namespace backend.Core.Services
                 page.Content().Column(column =>
                       {
                         column.Item().Text("Product Report")
-                              .FontSize(18).Bold();
+                              .FontSize(18).Bold().FontFamily("Microsoft Sans Serif");
 
 
                         column.Item().Table(table =>
@@ -53,8 +52,6 @@ namespace backend.Core.Services
                               table.Cell().Text(item.TotalRevenue.ToString("C", new CultureInfo("uk-UA"))).FontFamily("Microsoft Sans Serif");
                             }
                           });
-
-                        column.Item().Image(chartImageByteArray);
                       });
               });
       });
@@ -75,7 +72,7 @@ namespace backend.Core.Services
 
                 page.Content().Column(column =>
                       {
-                        column.Item().Text("Some text").FontSize(18).Bold();
+                        column.Item().Text("Customer Report").FontSize(18).Bold().FontFamily("Microsoft Sans Serif");
 
                         column.Item().Table(table =>
                           {
@@ -84,21 +81,20 @@ namespace backend.Core.Services
                                 c.RelativeColumn();
                                 c.RelativeColumn();
                                 c.RelativeColumn();
-                                c.RelativeColumn();
                               });
 
                             table.Header(header =>
                               {
-                                header.Cell().Text("Ім\'я користувача").Bold();
-                                header.Cell().Text("Всього замовлень").Bold();
-                                header.Cell().Text("Всього витрачено").Bold();
+                                header.Cell().Text("Ім\'я користувача").Bold().FontFamily("Microsoft Sans Serif");
+                                header.Cell().Text("Всього замовлень").Bold().FontFamily("Microsoft Sans Serif");
+                                header.Cell().Text("Повний прибуток").Bold().FontFamily("Microsoft Sans Serif");
                               });
 
                             foreach (var item in reportData)
                             {
-                              table.Cell().Text(item.CustomerName);
-                              table.Cell().Text(item.TotalOrders.ToString());
-                              table.Cell().Text(item.TotalSpent.ToString("C", new CultureInfo("uk-UA")));
+                              table.Cell().Text(item.CustomerName).FontFamily("Microsoft Sans Serif");
+                              table.Cell().Text(item.TotalOrders.ToString()).FontFamily("Microsoft Sans Serif");
+                              table.Cell().Text(item.TotalSpent.ToString("C", new CultureInfo("uk-UA"))).FontFamily("Microsoft Sans Serif");
                             }
                           });
                       });
@@ -122,7 +118,7 @@ namespace backend.Core.Services
                 page.Content().Column(column =>
                       {
                         column.Item().Text("All Orders Report")
-                              .FontSize(18).Bold();
+                              .FontSize(18).Bold().FontFamily("Microsoft Sans Serif");
 
                         column.Item().Table(table =>
                           {
@@ -139,15 +135,15 @@ namespace backend.Core.Services
                                 header.Cell().Text("Ім\'я користувача").Bold().FontFamily("Microsoft Sans Serif");
                                 header.Cell().Text("Назва продукту").Bold().FontFamily("Microsoft Sans Serif");
                                 header.Cell().Text("Кількість продукту").Bold().FontFamily("Microsoft Sans Serif");
-                                header.Cell().Text("Ціна").Bold().FontFamily("Microsoft Sans Serif");
+                                header.Cell().Text("Вартість замовлення").Bold().FontFamily("Microsoft Sans Serif");
                               });
 
                             foreach (var item in reportData)
                             {
-                              table.Cell().Text(item.CustomerName);
-                              table.Cell().Text(item.ProductName);
-                              table.Cell().Text(item.ProductCount.ToString());
-                              table.Cell().Text(item.Price.ToString("C", new CultureInfo("uk-UA")));
+                              table.Cell().Text(item.CustomerName).FontFamily("Microsoft Sans Serif");
+                              table.Cell().Text(item.ProductName).FontFamily("Microsoft Sans Serif");
+                              table.Cell().Text(item.ProductCount.ToString()).FontFamily("Microsoft Sans Serif");
+                              table.Cell().Text(item.Price.ToString("C", new CultureInfo("uk-UA"))).FontFamily("Microsoft Sans Serif");
                             }
                           });
                       });
@@ -171,7 +167,7 @@ namespace backend.Core.Services
                 page.Content().Column(column =>
                       {
                         column.Item().Text("Order Trends by Customer Report")
-                              .FontSize(18).Bold();
+                              .FontSize(18).Bold().FontFamily("Microsoft Sans Serif");
 
                         column.Item().Table(table =>
                           {
@@ -185,7 +181,7 @@ namespace backend.Core.Services
                             table.Header(header =>
                               {
                                 header.Cell().Text("Ім\'я користувача").Bold().FontFamily("Microsoft Sans Serif");
-                                header.Cell().Text("Місяць замовлення").Bold().FontFamily("Microsoft Sans Serif");
+                                header.Cell().Text("Дата замовлення").Bold().FontFamily("Microsoft Sans Serif");
                                 header.Cell().Text("Всього замовлень").Bold().FontFamily("Microsoft Sans Serif");
                               });
 
@@ -217,7 +213,7 @@ namespace backend.Core.Services
                 page.Content().Column(column =>
                       {
                         column.Item().Text("Order Trends by Product Report")
-                              .FontSize(18).Bold();
+                              .FontSize(18).Bold().FontFamily("Microsoft Sans Serif");
 
                         column.Item().Table(table =>
                           {
@@ -231,7 +227,7 @@ namespace backend.Core.Services
                             table.Header(header =>
                               {
                                 header.Cell().Text("Назва продукту").Bold().FontFamily("Microsoft Sans Serif");
-                                header.Cell().Text("Місяць замовлення").Bold().FontFamily("Microsoft Sans Serif");
+                                header.Cell().Text("Дата замовлення").Bold().FontFamily("Microsoft Sans Serif");
                                 header.Cell().Text("Усього продано").Bold().FontFamily("Microsoft Sans Serif");
                               });
 
@@ -305,16 +301,14 @@ namespace backend.Core.Services
         float textY = y - 5;
         canvas.DrawText(valueText, textX, textY, textPaint);
 
-        // --- Рисуем повернутый текст ---
-        canvas.Save(); // Сохраняем состояние холста
+        canvas.Save();
         float labelX = x + barWidth / 2;
         float labelY = height - 20;
-        canvas.Translate(labelX, labelY); // Перемещаем точку отсчёта в нужное место
-        canvas.RotateDegrees(-45); // Поворачиваем на -45 градусов
-        canvas.DrawText(productName, 0, 0, textPaint); // Рисуем текст в новой системе координат
-        canvas.Restore(); // Восстанавливаем холст
+        canvas.Translate(labelX, labelY);
+        canvas.RotateDegrees(-45);
+        canvas.DrawText(productName, 0, 0, textPaint);
+        canvas.Restore();
       }
-
 
       using var image = surface.Snapshot();
       using var dataPng = image.Encode(SKEncodedImageFormat.Png, 100);

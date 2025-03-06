@@ -23,10 +23,10 @@
   <mat-form-field class="w-[300px] self-center" appearance="fill">
     <mat-label>Кількість</mat-label>
     <input matInput formControlName="productCount" type="number" required>
-    <mat-error *ngIf="form.get('count')?.hasError('required')">
+    <mat-error *ngIf="form.get('productCount')?.hasError('required')">
       Вкажіть кількість продукту.
     </mat-error>
-    <mat-error *ngIf="form.get('count')?.hasError('min')">
+    <mat-error *ngIf="form.get('productCount')?.hasError('min')">
       Кількість повинна бути не меншою за 1.
     </mat-error>
   </mat-form-field>

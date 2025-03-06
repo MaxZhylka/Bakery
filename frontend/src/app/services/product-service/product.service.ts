@@ -17,15 +17,15 @@ export class ProductsService {
   }
 
   getProductsByCount(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/count-more-than`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: { ...params, count: 100, directionCount: true } });
   }
 
   getProductsByPrice(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-than`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: { ...params, price: 250, directionPrice: true  } });
   }
 
   getFilteredProducts(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-count-less`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: {  ...params, price: 100, directionPrice: false, count: 50, directionCount: true  } });
   }
 
   createProduct(product: Product): Observable<Product> {

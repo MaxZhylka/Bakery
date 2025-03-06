@@ -1,3 +1,4 @@
+using System.Data;
 using backend.Core.DTOs;
 using backend.Core.Enums;
 using backend.Core.Models;
@@ -160,7 +161,7 @@ namespace backend.Infrastructure.Repositories
       {
         using (connection ??= _connectionFactory.CreateConnection())
         {
-          if (connection.State != System.Data.ConnectionState.Open)
+          if (connection.State != ConnectionState.Open)
             await connection.OpenAsync();
 
           OrderEntity? order = null;
@@ -208,49 +209,85 @@ namespace backend.Infrastructure.Repositories
         using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
-
-          var query = @"
-        INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerId) 
-        OUTPUT INSERTED.Id, INSERTED.ProductId, INSERTED.ProductCount, INSERTED.Price, INSERTED.CreatedAt, INSERTED.CustomerId
-        VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerId)";
-
-          using (var command = new SqlCommand(query, connection))
+          using (var transaction = connection.BeginTransaction(IsolationLevel.RepeatableRead))
           {
-            command.Parameters.AddWithValue("@Id", order.Id);
-            command.Parameters.AddWithValue("@ProductId", order.ProductId);
-            command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
-            command.Parameters.AddWithValue("@Price", order.Price);
-            command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
-            command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
+            var query = @"
+                    DECLARE @UpdatedRows INT;
 
-            using (var reader = await command.ExecuteReaderAsync())
+                    UPDATE Products
+                    SET ProductCount = ProductCount - @ProductCount
+                    WHERE Id = @ProductId AND ProductCount >= @ProductCount;
+
+                    SET @UpdatedRows = @@ROWCOUNT;
+                    
+                    IF (@UpdatedRows = 0)
+                    BEGIN
+                        ROLLBACK TRANSACTION;
+                        THROW 50000, 'Not enough stock available or product not found.', 1;
+                    END
+                    Waitfor delay '00:00:10';
+                    INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerId)
+                    OUTPUT 
+                        INSERTED.Id, 
+                        INSERTED.ProductId, 
+                        INSERTED.ProductCount, 
+                        INSERTED.Price, 
+                        INSERTED.CreatedAt, 
+                        INSERTED.CustomerId
+                    VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerId);
+                ";
+
+            OrderEntity? createdOrder = null;
+
+            using (var command = new SqlCommand(query, connection, transaction))
             {
-              if (await reader.ReadAsync())
+              command.Parameters.AddWithValue("@Id", order.Id);
+              command.Parameters.AddWithValue("@ProductId", order.ProductId);
+              command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
+              command.Parameters.AddWithValue("@Price", order.Price);
+              command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+              command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
+
+              using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow))
               {
-                return new OrderEntity
+                if (await reader.ReadAsync())
                 {
-                  Id = reader.GetGuid(0),
-                  ProductId = reader.GetGuid(1),
-                  ProductCount = reader.GetInt32(2),
-                  Price = reader.GetDecimal(3),
-                  CreatedAt = reader.GetDateTime(4),
-                  CustomerId = reader.GetGuid(5)
-                };
+                  createdOrder = new OrderEntity
+                  {
+                    Id = reader.GetGuid(0),
+                    ProductId = reader.GetGuid(1),
+                    ProductCount = reader.GetInt32(2),
+                    Price = reader.GetDecimal(3),
+                    CreatedAt = reader.GetDateTime(4),
+                    CustomerId = reader.GetGuid(5)
+                  };
+                }
               }
             }
+
+            if (createdOrder == null)
+            {
+              throw new Exception("Unexpected inserting error");
+            }
+
+            await transaction.CommitAsync();
+
+            return createdOrder;
           }
         }
       }
-      catch (SqlException e)
-      {
-        throw new DatabaseOperationException(Operations.CreateOrder, e);
-      }
       catch (Exception e)
       {
-        throw new Exception($"Error getting DB connection{e}");
+            Console.WriteLine(e);
+        if (e.Message.Contains("Not enough stock available or product not found."))
+        {
+          throw new Exception("Недостатньо товару на складі", e);
+        }
+        throw new Exception($"Error getting DB connection {e}");
       }
-      throw new Exception("Unexpected inserting error");
     }
+
+
 
     public async Task<OrderEntity> UpdateOrderAsync(Guid id, OrderEntity order)
     {
@@ -304,27 +341,51 @@ namespace backend.Infrastructure.Repositories
         {
           await connection.OpenAsync();
 
-          var order = await GetOrderAsync(id, connection);
+          var query = @"
+                DELETE FROM Orders
+                OUTPUT DELETED.Id,
+                      DELETED.ProductId,
+                      DELETED.ProductCount,
+                      DELETED.Price,
+                      DELETED.CreatedAt,
+                      DELETED.CustomerId
+                WHERE Id = @Id;
+            ";
 
-          var query = "DELETE FROM Orders WHERE Id = @Id";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Id", id);
-            var rowsAffected = await command.ExecuteNonQueryAsync();
-            if (rowsAffected == 0)
-              throw new KeyNotFoundException($"Order with ID {id} was not found for deletion");
-          }
 
-          return order;
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+              return new OrderEntity
+              {
+                Id = reader.GetGuid(0),
+                ProductId = reader.GetGuid(1),
+                ProductCount = reader.GetInt32(2),
+                Price = reader.GetDecimal(3),
+                CreatedAt = reader.GetDateTime(4),
+                CustomerId = reader.GetGuid(5)
+              };
+            }
+            else
+            {
+
+              throw new KeyNotFoundException($"Order with ID {id} was not found for deletion");
+            }
+          }
         }
       }
       catch (SqlException e)
       {
+        Console.WriteLine(e);
         throw new DatabaseOperationException(Operations.DeleteOrder, e);
       }
       catch (Exception e)
       {
-        throw new Exception($"Error getting DB connection{e}");
+        Console.WriteLine(e);
+        throw new Exception($"Error getting DB connection {e}");
       }
     }
   }

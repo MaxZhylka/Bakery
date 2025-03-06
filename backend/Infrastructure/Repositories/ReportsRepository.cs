@@ -148,14 +148,15 @@ namespace backend.Infrastructure.Repositories
 					await connection.OpenAsync();
 
 				const string query = @"
-                    SELECT 
-                        u.Name AS CustomerName,
-                        FORMAT(o.CreatedAt, 'yyyy-MM') AS OrderMonth,
-                        COUNT(o.Id) AS TotalOrders
-                    FROM Orders o
-                    JOIN Users u ON o.CustomerId = u.Id
-                    GROUP BY u.Name, FORMAT(o.CreatedAt, 'yyyy-MM')
-                    ORDER BY OrderMonth DESC";
+                  SELECT 
+											u.Name AS CustomerName,
+											FORMAT(o.CreatedAt, 'yyyy-MM-dd') AS OrderDate,
+											COUNT(o.Id) AS TotalOrders
+									FROM Orders o
+									JOIN Users u ON o.CustomerId = u.Id
+									WHERE o.CreatedAt >= DATEADD(DAY, -30, GETDATE())
+									GROUP BY u.Name, FORMAT(o.CreatedAt, 'yyyy-MM-dd')
+									ORDER BY OrderDate DESC";
 
 				using var command = new SqlCommand(query, connection);
 				var results = new List<OrderTrendsByCustomerDto>();
@@ -189,13 +190,14 @@ namespace backend.Infrastructure.Repositories
 
 				const string query = @"
                     SELECT 
-                        p.Name AS ProductName,
-                        FORMAT(o.CreatedAt, 'yyyy-MM') AS OrderMonth,
-                        SUM(o.ProductCount) AS TotalSold
-                    FROM Orders o
-                    JOIN Products p ON o.ProductId = p.Id
-                    GROUP BY p.Name, FORMAT(o.CreatedAt, 'yyyy-MM')
-                    ORDER BY OrderMonth DESC";
+												p.Name AS ProductName,
+												FORMAT(o.CreatedAt, 'yyyy-MM-dd') AS OrderDate,
+												SUM(o.ProductCount) AS TotalSold
+										FROM Orders o
+										JOIN Products p ON o.ProductId = p.Id
+										WHERE o.CreatedAt >= DATEADD(DAY, -30, GETDATE())
+										GROUP BY p.Name, FORMAT(o.CreatedAt, 'yyyy-MM-dd')
+										ORDER BY OrderDate DESC";
 
 				using var command = new SqlCommand(query, connection);
 				var results = new List<OrderTrendsByProductDto>();

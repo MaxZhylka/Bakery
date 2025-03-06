@@ -7,7 +7,7 @@ namespace backend.Core.Interfaces
     {
         Task<PaginatedResult<ProductEntity>> GetProducts(PaginationParameters paginationParameters);
 
-        Task<PaginatedResult<ProductEntity>> GetProductsByValues(int count, bool directionCount, double price, bool directionPrice, PaginationParameters paginationParams);
+        Task<PaginatedResult<ProductEntity>> GetProductsByValues(int? count, bool? directionCount, double? price, bool? directionPrice, PaginationParameters paginationParams);
         Task<ProductDTO> GetProduct(Guid id);
         Task<ProductDTO> CreateProduct(ProductDTO product);
         Task<ProductDTO> UpdateProduct(Guid id, ProductDTO product);

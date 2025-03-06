@@ -13,6 +13,7 @@ import { of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SetLoading } from './app.actions';
 import { DataByPagination, Order } from '../interfaces';
+import { GetProducts } from './products.actions';
 
 
 export interface OrdersStateModel {
@@ -24,7 +25,7 @@ export interface OrdersStateModel {
 @State<OrdersStateModel>({
   name: 'orders',
   defaults: {
-    orders: {data: [], total: 0},
+    orders: { data: [], total: 0 },
     dynamicData: null,
     error: null,
   }
@@ -57,18 +58,18 @@ export class OrdersState {
   }
 
   @Action(CreateOrder)
-  createOrder(ctx: StateContext<OrdersStateModel>, { orderData }: CreateOrder) {
+  createOrder(ctx: StateContext<OrdersStateModel>, { orderData, paginationParams }: CreateOrder) {
     this.store.dispatch(new SetLoading(true));
     return this.ordersService.createOrder(orderData).pipe(
-      tap((createdOrder) => ctx.dispatch(new CreateOrderSuccess(createdOrder))),
+      tap((createdOrder) => ctx.dispatch(new CreateOrderSuccess(createdOrder, paginationParams))),
       catchError((error) => {
-        ctx.dispatch(new CreateOrderFail(error.message));
+        ctx.dispatch(new CreateOrderFail(error.error.error, paginationParams));
         return of();
       }),
       tap(() => this.store.dispatch(new SetLoading(false)))
     );
   }
-  
+
   @Action(UpdateOrder)
   updateOrder(ctx: StateContext<OrdersStateModel>, { orderId, updateData }: UpdateOrder) {
     this.store.dispatch(new SetLoading(true));
@@ -81,12 +82,12 @@ export class OrdersState {
       tap(() => this.store.dispatch(new SetLoading(false)))
     );
   }
-  
+
   @Action(DeleteOrder)
-  deleteOrder(ctx: StateContext<OrdersStateModel>, { orderId }: DeleteOrder) {
+  deleteOrder(ctx: StateContext<OrdersStateModel>, { orderId, paginationParams, user }: DeleteOrder) {
     this.store.dispatch(new SetLoading(true));
     return this.ordersService.deleteOrder(orderId).pipe(
-      tap(() => ctx.dispatch(new DeleteOrderSuccess())),
+      tap(() => ctx.dispatch(new DeleteOrderSuccess(paginationParams, user))),
       catchError((error) => {
         ctx.dispatch(new DeleteOrderFail(error.message));
         return of();
@@ -94,45 +95,56 @@ export class OrdersState {
       tap(() => this.store.dispatch(new SetLoading(false)))
     );
   }
-  
 
   @Action(GetOrdersSuccess)
   getOrdersSuccess(ctx: StateContext<OrdersStateModel>, { orders }: GetOrdersSuccess) {
     ctx.patchState({ orders, error: null });
   }
-  
+
   @Action(GetOrdersFail)
   getOrdersFail(ctx: StateContext<OrdersStateModel>, { error }: GetOrdersFail) {
     ctx.patchState({ error });
   }
-  
+
   @Action(CreateOrderSuccess)
-  createOrderSuccess(ctx: StateContext<OrdersStateModel>, { createdOrder }: CreateOrderSuccess) {
+  createOrderSuccess(ctx: StateContext<OrdersStateModel>, { createdOrder, paginationParams }: CreateOrderSuccess) {
     this.snackBar.open('Замовлення створено успішно', 'Закрити', { duration: 3000 });
+    this.store.dispatch(new GetProducts(paginationParams));
   }
-  
+
   @Action(CreateOrderFail)
-  createOrderFail(ctx: StateContext<OrdersStateModel>, { error }: CreateOrderFail) {
+  createOrderFail(ctx: StateContext<OrdersStateModel>, { error, paginationParams }: CreateOrderFail) {
     ctx.patchState({ error });
-    this.snackBar.open('Помилка створення замовлення', 'Закрити', { duration: 3000 });
+    this.store.dispatch(new GetProducts(paginationParams));
+    if (error === 'Недостатньо товару на складі') {
+      return this.snackBar.open('Недостатньо товару на складі', 'Закрити', { duration: 3000 });
+    }
+    return this.snackBar.open('Помилка створення замовлення', 'Закрити', { duration: 3000 });
   }
-  
+
   @Action(UpdateOrderSuccess)
   updateOrderSuccess() {
     this.snackBar.open('Замовлення оновлено', 'Закрити', { duration: 3000 });
   }
-  
+
   @Action(UpdateOrderFail)
   updateOrderFail(ctx: StateContext<OrdersStateModel>, { error }: UpdateOrderFail) {
     ctx.patchState({ error });
     this.snackBar.open('Помилка оновлення замовлення', 'Закрити', { duration: 3000 });
   }
-  
+
   @Action(DeleteOrderSuccess)
-  deleteOrderSuccess() {
+  deleteOrderSuccess(ctx: StateContext<OrdersStateModel>, { paginationParams, user }: DeleteOrderSuccess) {
     this.snackBar.open('Замовлення видалено', 'Закрити', { duration: 3000 });
+
+    if (user) {
+      this.store.dispatch(new GetOrdersByUserId(paginationParams, user.id));
+    } else {
+      this.store.dispatch(new GetOrders(paginationParams));
+    }
+
   }
-  
+
   @Action(DeleteOrderFail)
   deleteOrderFail(ctx: StateContext<OrdersStateModel>, { error }: DeleteOrderFail) {
     ctx.patchState({ error });

@@ -23,16 +23,16 @@ public class AuthController(IAuthService authService) : ControllerBase
     Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
     Response.Cookies.Append("DeviceId", tokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -55,16 +55,16 @@ public class AuthController(IAuthService authService) : ControllerBase
     Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
     Response.Cookies.Append("DeviceId", tokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -90,16 +90,16 @@ public class AuthController(IAuthService authService) : ControllerBase
     Response.Cookies.Append("RefreshToken", userWithTokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
     Response.Cookies.Append("DeviceId", userWithTokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
