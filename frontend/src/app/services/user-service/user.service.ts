@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User, PaginationParams, DataByPagination } from '../../interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UsersService {
-  private readonly apiUrl = '/api/users';
+  private readonly apiUrl = environment.apiUrl + '/users';
 
   constructor(private readonly http: HttpClient) { }
 

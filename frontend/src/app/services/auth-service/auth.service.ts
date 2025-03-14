@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
-import { AuthResponse, LoginPayload, RegisterPayload, User } from '../../interfaces';
+import { AuthResponse, LoginPayload, RegisterPayload } from '../../interfaces';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -34,17 +34,17 @@ export class AuthService {
   }
 
   register(registerPayload: RegisterPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/registration`, registerPayload, { withCredentials: true }).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/register`, registerPayload, { withCredentials: true }).pipe(
       tap((response) => {
         this.setToken(response.accessToken);
       })
     );
   }
 
-  logout(): void {
+  logout(): Observable<void> {
     localStorage.removeItem(this.TOKEN_KEY);
     this.isAuthenticated$.next(false);
-    this.router.navigate(['/login']);
+    return this.http.get<void>(`${this.apiUrl}/Auth/logout`, { withCredentials: true });
   }
 
   refreshToken(): Observable<string> {

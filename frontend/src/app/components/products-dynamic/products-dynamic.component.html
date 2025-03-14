@@ -1,0 +1,17 @@
+<div class="w-[100%] h-[100%] flex justify-center items-center">
+<ngx-charts-bar-vertical
+  *ngIf="productSales"
+  [view]="view"
+  [scheme]="'vivid'"
+  [results]="productSales"
+  [gradient]="true"
+  [xAxis]="true"
+  [yAxis]="true"
+  [legend]="false"
+  [showXAxisLabel]="true"
+  [showYAxisLabel]="true"
+  [xAxisLabel]="'Продукти'"
+  [yAxisLabel]="'Продано'"
+>
+</ngx-charts-bar-vertical>
+</div>

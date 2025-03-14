@@ -43,7 +43,7 @@ export interface Product {
     id: string;
     name: string;
     price: number;
-    count: number;
+    productCount: number;
     createdAt: string;
 }
 
@@ -65,7 +65,7 @@ export interface ICreateOrder {
     productId: string;
     productCount: number;
     price: number;
-    customerName: string;
+    customerId: string;
 };
 
 
@@ -77,7 +77,7 @@ export interface IUpdateOrder {
     productId: string;
     productCount: number;
     price: number;
-    customerName: string;
+    customerId: string;
 }
 
 export interface ICreateUser {
@@ -91,4 +91,9 @@ export enum Roles {
     Admin = 'Admin',
     User = 'User',
     Manager = 'Manager'
+}
+
+export interface ProductSales {
+    productName: string;
+    totalSold: string;
 }

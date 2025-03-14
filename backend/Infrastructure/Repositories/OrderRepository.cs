@@ -1,53 +1,157 @@
-using Microsoft.Data.SqlClient;
+using System.Data;
+using backend.Core.DTOs;
+using backend.Core.Enums;
 using backend.Core.Models;
 using backend.Infrastructure.Interfaces;
 using Core.Exceptions;
-using backend.Core.Enums;
+using Microsoft.Data.SqlClient;
+
 
 namespace backend.Infrastructure.Repositories
 {
   public class OrderRepository(IDBConnectionFactory connectionFactory) : IOrderRepository
   {
-    public async Task<IEnumerable<OrderEntity>> GetOrdersAsync(SqlConnection? connection = null)
+    private readonly IDBConnectionFactory _connectionFactory = connectionFactory;
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersAsync(PaginationParameters paginationParameters, SqlConnection? connection = null)
     {
       try
       {
-        using (connection ??= connectionFactory.CreateConnection())
+        using (connection ??= _connectionFactory.CreateConnection())
         {
           if (connection.State != System.Data.ConnectionState.Open)
             await connection.OpenAsync();
 
-          List<OrderEntity> orders = [];
-
-          string query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerName FROM Orders";
-
-          using (var command = new SqlCommand(query, connection))
-          using (var reader = await command.ExecuteReaderAsync())
+          const string countQuery = "SELECT COUNT(*) FROM Orders";
+          int totalCount;
+          using (var countCommand = new SqlCommand(countQuery, connection))
           {
+            totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+          }
+
+          string itemsQuery = @"
+                SELECT o.Id, o.ProductId, p.Name AS ProductName, u.Name, o.ProductCount, o.Price, o.CreatedAt
+                FROM Orders o
+                JOIN Products p ON o.ProductId = p.Id
+                Join Users u On o.CustomerId = u.Id
+                ORDER BY o.CreatedAt DESC
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+            ";
+
+          var items = new List<OrderDTO>();
+
+          using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+          {
+            int offset = paginationParameters.Offset * paginationParameters.Size;
+            itemsCommand.Parameters.AddWithValue("@Offset", offset);
+            itemsCommand.Parameters.AddWithValue("@PageSize", paginationParameters.Size);
+
+            using var reader = await itemsCommand.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-              orders.Add(new OrderEntity
+              var product = new OrderDTO
               {
                 Id = reader.GetGuid(0),
                 ProductId = reader.GetGuid(1),
-                ProductCount = reader.GetInt32(2),
-                Price = reader.GetDecimal(3),
-                CreatedAt = reader.GetDateTime(4),
-                CustomerName = reader.GetString(5)
-              });
+                ProductName = reader.GetString(2),
+                CustomerName = reader.GetString(3),
+                ProductCount = reader.GetInt32(4),
+                Price = reader.GetDecimal(5),
+                CreatedAt = reader.GetDateTime(6)
+              };
+              items.Add(product);
             }
           }
 
-          return orders;
+          return new PaginatedResult<OrderDTO>
+          {
+            Total = totalCount,
+            Data = items
+          };
         }
       }
       catch (SqlException e)
       {
-        throw new DatabaseOperationException(Operations.GetOrders, e);
+        throw new DatabaseOperationException(Operations.GetProducts, e);
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
+      }
+    }
+
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserIdAsync(PaginationParameters paginationParameters, Guid userId)
+    {
+      try
+      {
+        using (var connection = _connectionFactory.CreateConnection())
+        {
+          if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
+
+          const string countQuery = @"
+                SELECT COUNT(*) 
+                FROM Orders
+                WHERE CustomerId = @UserId
+            ";
+          int totalCount;
+          using (var countCommand = new SqlCommand(countQuery, connection))
+          {
+            countCommand.Parameters.AddWithValue("@UserId", userId);
+            totalCount = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+          }
+
+          string itemsQuery = @"
+                SELECT o.Id, o.ProductId, p.Name AS ProductName, u.Name, o.ProductCount, o.Price, o.CreatedAt
+                FROM Orders o
+                JOIN Products p ON o.ProductId = p.Id
+                Join Users u ON o.CustomerId = u.Id
+                WHERE CustomerId = @UserId
+                ORDER BY o.CreatedAt DESC
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+            ";
+
+          var items = new List<OrderDTO>();
+
+          using (var itemsCommand = new SqlCommand(itemsQuery, connection))
+          {
+            int offset = paginationParameters.Offset * paginationParameters.Size;
+            itemsCommand.Parameters.AddWithValue("@UserId", userId);
+            itemsCommand.Parameters.AddWithValue("@Offset", offset);
+            itemsCommand.Parameters.AddWithValue("@PageSize", paginationParameters.Size);
+
+            using var reader = await itemsCommand.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+              var orderDto = new OrderDTO
+              {
+                Id = reader.GetGuid(0),
+                ProductId = reader.GetGuid(1),
+                ProductName = reader.GetString(2),
+                CustomerName = reader.GetString(3),
+                ProductCount = reader.GetInt32(4),
+                Price = reader.GetDecimal(5),
+                CreatedAt = reader.GetDateTime(6)
+              };
+              items.Add(orderDto);
+            }
+          }
+
+          return new PaginatedResult<OrderDTO>
+          {
+            Total = totalCount,
+            Data = items
+          };
+        }
+      }
+      catch (SqlException e)
+      {
+        throw new DatabaseOperationException(Operations.GetProducts, e);
+      }
+      catch (Exception e)
+      {
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -55,14 +159,14 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (connection ??= connectionFactory.CreateConnection())
+        using (connection ??= _connectionFactory.CreateConnection())
         {
-          if (connection.State != System.Data.ConnectionState.Open)
+          if (connection.State != ConnectionState.Open)
             await connection.OpenAsync();
 
           OrderEntity? order = null;
 
-          var query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerName FROM Orders WHERE Id = @Id";
+          var query = "SELECT Id, ProductId, ProductCount, Price, CreatedAt, CustomerId FROM Orders WHERE Id = @Id";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Id", id);
@@ -77,7 +181,7 @@ namespace backend.Infrastructure.Repositories
                 ProductCount = reader.GetInt32(2),
                 Price = reader.GetDecimal(3),
                 CreatedAt = reader.GetDateTime(4),
-                CustomerName = reader.GetString(5)
+                CustomerId = reader.GetGuid(5)
               };
             }
           }
@@ -94,7 +198,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -102,45 +206,94 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
-
-          var query = @"
-            INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerName) 
-            OUTPUT INSERTED.Id 
-            VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerName)";
-
-          using (var command = new SqlCommand(query, connection))
+          using (var transaction = connection.BeginTransaction(IsolationLevel.RepeatableRead))
           {
-            command.Parameters.AddWithValue("@Id", order.Id);
-            command.Parameters.AddWithValue("@ProductId", order.ProductId);
-            command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
-            command.Parameters.AddWithValue("@Price", order.Price);
-            command.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
-            command.Parameters.AddWithValue("@CustomerName", order.CustomerName);
+            var query = @"
+                    DECLARE @UpdatedRows INT;
 
-            await command.ExecuteScalarAsync();
+                    UPDATE Products
+                    SET ProductCount = ProductCount - @ProductCount
+                    WHERE Id = @ProductId AND ProductCount >= @ProductCount;
+
+                    SET @UpdatedRows = @@ROWCOUNT;
+                    
+                    IF (@UpdatedRows = 0)
+                    BEGIN
+                        ROLLBACK TRANSACTION;
+                        THROW 50000, 'Not enough stock available or product not found.', 1;
+                    END
+                    Waitfor delay '00:00:10';
+                    INSERT INTO Orders (Id, ProductId, ProductCount, Price, CreatedAt, CustomerId)
+                    OUTPUT 
+                        INSERTED.Id, 
+                        INSERTED.ProductId, 
+                        INSERTED.ProductCount, 
+                        INSERTED.Price, 
+                        INSERTED.CreatedAt, 
+                        INSERTED.CustomerId
+                    VALUES (@Id, @ProductId, @ProductCount, @Price, @CreatedAt, @CustomerId);
+                ";
+
+            OrderEntity? createdOrder = null;
+
+            using (var command = new SqlCommand(query, connection, transaction))
+            {
+              command.Parameters.AddWithValue("@Id", order.Id);
+              command.Parameters.AddWithValue("@ProductId", order.ProductId);
+              command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
+              command.Parameters.AddWithValue("@Price", order.Price);
+              command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+              command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
+
+              using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow))
+              {
+                if (await reader.ReadAsync())
+                {
+                  createdOrder = new OrderEntity
+                  {
+                    Id = reader.GetGuid(0),
+                    ProductId = reader.GetGuid(1),
+                    ProductCount = reader.GetInt32(2),
+                    Price = reader.GetDecimal(3),
+                    CreatedAt = reader.GetDateTime(4),
+                    CustomerId = reader.GetGuid(5)
+                  };
+                }
+              }
+            }
+
+            if (createdOrder == null)
+            {
+              throw new Exception("Unexpected inserting error");
+            }
+
+            await transaction.CommitAsync();
+
+            return createdOrder;
           }
-
-          return await GetOrderAsync(order.Id, connection);
         }
-      }
-      catch (SqlException e)
-      {
-        throw new DatabaseOperationException(Operations.CreateOrder, e);
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+            Console.WriteLine(e);
+        if (e.Message.Contains("Not enough stock available or product not found."))
+        {
+          throw new Exception("Недостатньо товару на складі", e);
+        }
+        throw new Exception($"Error getting DB connection {e}");
       }
     }
+
+
 
     public async Task<OrderEntity> UpdateOrderAsync(Guid id, OrderEntity order)
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
 
@@ -150,7 +303,7 @@ namespace backend.Infrastructure.Repositories
                 ProductCount = @ProductCount,
                 Price = @Price,
                 CreatedAt = @CreatedAt,
-                CustomerName = @CustomerName
+                CustomerId= @CustomerId
             WHERE Id = @Id";
 
           using (var command = new SqlCommand(query, connection))
@@ -160,7 +313,7 @@ namespace backend.Infrastructure.Repositories
             command.Parameters.AddWithValue("@ProductCount", order.ProductCount);
             command.Parameters.AddWithValue("@Price", order.Price);
             command.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
-            command.Parameters.AddWithValue("@CustomerName", order.CustomerName);
+            command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
 
             var rowsAffected = await command.ExecuteNonQueryAsync();
             if (rowsAffected == 0)
@@ -176,7 +329,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -184,31 +337,55 @@ namespace backend.Infrastructure.Repositories
     {
       try
       {
-        using (var connection = connectionFactory.CreateConnection())
+        using (var connection = _connectionFactory.CreateConnection())
         {
           await connection.OpenAsync();
 
-          var order = await GetOrderAsync(id, connection);
+          var query = @"
+                DELETE FROM Orders
+                OUTPUT DELETED.Id,
+                      DELETED.ProductId,
+                      DELETED.ProductCount,
+                      DELETED.Price,
+                      DELETED.CreatedAt,
+                      DELETED.CustomerId
+                WHERE Id = @Id;
+            ";
 
-          var query = "DELETE FROM Orders WHERE Id = @Id";
           using (var command = new SqlCommand(query, connection))
           {
             command.Parameters.AddWithValue("@Id", id);
-            var rowsAffected = await command.ExecuteNonQueryAsync();
-            if (rowsAffected == 0)
-              throw new KeyNotFoundException($"Order with ID {id} was not found for deletion");
-          }
 
-          return order;
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+              return new OrderEntity
+              {
+                Id = reader.GetGuid(0),
+                ProductId = reader.GetGuid(1),
+                ProductCount = reader.GetInt32(2),
+                Price = reader.GetDecimal(3),
+                CreatedAt = reader.GetDateTime(4),
+                CustomerId = reader.GetGuid(5)
+              };
+            }
+            else
+            {
+
+              throw new KeyNotFoundException($"Order with ID {id} was not found for deletion");
+            }
+          }
         }
       }
       catch (SqlException e)
       {
+        Console.WriteLine(e);
         throw new DatabaseOperationException(Operations.DeleteOrder, e);
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        Console.WriteLine(e);
+        throw new Exception($"Error getting DB connection {e}");
       }
     }
   }

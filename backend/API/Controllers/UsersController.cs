@@ -1,5 +1,6 @@
 using backend.Core.DTOs;
 using backend.Core.Interfaces;
+using backend.Core.Models;
 using Core.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +29,11 @@ public class UsersController(IUserService userService) : ControllerBase
   }
 
   [ErrorHandler]
-  [Authorize(Roles = "Admin")]
+  [Authorize(Roles = "Admin,Manager")]
   [HttpGet]
-  public async Task<IEnumerable<UserDTO>> GetUsers()
+  public async Task<PaginatedResult<UserDTO>> GetUsers([FromQuery] PaginationParameters paginationParameters)
   {
-    return await _userService.GetUsers();
+    return await _userService.GetUsers(paginationParameters);
   }
 
   [ErrorHandler]

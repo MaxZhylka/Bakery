@@ -1,11 +1,10 @@
-using Microsoft.Data.SqlClient;
-using backend.Infrastructure.Interfaces;
-
 using backend.Core.DTOs;
 using backend.Core.Enums;
+using backend.Core.Models;
+using backend.Infrastructure.Interfaces;
 using Core.Exceptions;
 using Microsoft.CodeAnalysis.Emit;
-using backend.Core.Models;
+using Microsoft.Data.SqlClient;
 
 
 namespace backend.Infrastructure.Repositories
@@ -60,38 +59,56 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
-    public async Task<IEnumerable<UserDTO>> GetUsersAsync()
+    public async Task<PaginatedResult<UserDTO>> GetUsersAsync(PaginationParameters paginationParameters)
     {
       try
       {
-        using (var connection = _connectionFactory.CreateConnection())
+        using var connection = _connectionFactory.CreateConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+          await connection.OpenAsync();
+
+        const string countQuery = @"SELECT COUNT(*) FROM Users";
+        using var countCommand = new SqlCommand(countQuery, connection);
+        var totalRecords = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+
+        const string dataQuery = @"
+            SELECT 
+                Id, 
+                Name, 
+                Email, 
+                Role,
+                CreatedAt
+            FROM Users
+            ORDER BY Name ASC
+            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
+
+        using var dataCommand = new SqlCommand(dataQuery, connection);
+        dataCommand.Parameters.AddWithValue("@Offset", paginationParameters.Offset * paginationParameters.Size);
+        dataCommand.Parameters.AddWithValue("@Limit", paginationParameters.Size);
+
+        var users = new List<UserDTO>();
+        using var reader = await dataCommand.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
         {
-          if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-
-          List<UserDTO> users = [];
-
-          string query = "SELECT Id, Name, Email, Role FROM Users";
-          using (var command = new SqlCommand(query, connection))
+          users.Add(new UserDTO
           {
-            using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-              users.Add(new UserDTO
-              {
-                Id = reader.GetGuid(0),
-                Name = reader.GetString(1),
-                Email = reader.GetString(2),
-                Role = Enum.Parse<UserRole>(reader.GetString(3))
-              });
-            }
-          }
-          return users;
+            Id = reader.GetGuid(0),
+            Name = reader.GetString(1),
+            Email = reader.GetString(2),
+            Role = Enum.Parse<UserRole>(reader.GetString(3)),
+            CreatedAt = reader.GetDateTime(4)
+          });
         }
+
+        return new PaginatedResult<UserDTO>
+        {
+          Data = users.ToArray(),
+          Total = totalRecords,
+        };
       }
       catch (SqlException e)
       {
@@ -99,10 +116,9 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
-
     public async Task<UserDTO> DeleteUserAsync(Guid id)
     {
       try
@@ -132,7 +148,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -173,7 +189,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -212,7 +228,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
   }

@@ -6,27 +6,29 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 
-namespace backend.Core.Services 
+namespace backend.Core.Services
 {
     public class OrderService(IOrderRepository orderRepository, IMapper mapper) : IOrderService
     {
         private readonly IOrderRepository _orderRepository = orderRepository;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<IEnumerable<OrderDTO>> GetOrders()
+        public async Task<PaginatedResult<OrderDTO>> GetOrders(PaginationParameters paginationParameters)
         {
-            var orders = await _orderRepository.GetOrdersAsync();
-            return _mapper.Map<IEnumerable<OrderDTO>>(orders);
+            return await _orderRepository.GetOrdersAsync(paginationParameters);
         }
 
+        public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserId(PaginationParameters paginationParameters, Guid userId) {
+            return await _orderRepository.GetOrdersByUserIdAsync(paginationParameters, userId);
+        }
         public async Task<OrderDTO> GetOrder(Guid id)
         {
             var order = await _orderRepository.GetOrderAsync(id);
             return _mapper.Map<OrderDTO>(order);
         }
 
-        public async  Task<OrderDTO> CreateOrder(OrderDTO order)
-        {   
+        public async Task<OrderDTO> CreateOrder(OrderEntity order)
+        {
             var orderEntity = _mapper.Map<OrderEntity>(order);
             orderEntity.Id = Guid.NewGuid();
             var createdOrder = await _orderRepository.CreateOrderAsync(orderEntity);

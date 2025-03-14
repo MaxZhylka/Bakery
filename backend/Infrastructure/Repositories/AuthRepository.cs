@@ -58,7 +58,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -107,7 +107,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -149,7 +149,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -180,7 +180,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -228,7 +228,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
 
       return null;
@@ -275,7 +275,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -321,7 +321,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
 
@@ -351,7 +351,7 @@ namespace backend.Infrastructure.Repositories
       }
       catch (Exception e)
       {
-        throw new Exception("Error getting DB connection", e);
+        throw new Exception($"Error getting DB connection{e}");
       }
     }
   }

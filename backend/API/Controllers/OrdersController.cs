@@ -3,6 +3,7 @@ using backend.Core.Interfaces;
 using backend.Core.DTOs;
 using Core.Attributes;
 using Microsoft.AspNetCore.Authorization;
+using backend.Core.Models;
 
 namespace backend.API.Controllers
 {
@@ -13,15 +14,23 @@ namespace backend.API.Controllers
     private readonly IOrderService _orderService = orderService;
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpGet]
-    public async Task<IEnumerable<OrderDTO>> GetOrders()
+    public async Task<PaginatedResult<OrderDTO>> GetOrders([FromQuery] PaginationParameters paginationParameters)
     {
-      return await _orderService.GetOrders();
+      return await _orderService.GetOrders(paginationParameters);
     }
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
+    [HttpGet("ByUserId/{userId}")]
+    public async Task<PaginatedResult<OrderDTO>> GetOrdersByUserId([FromQuery] PaginationParameters paginationParameters, Guid userId)
+    {
+      return await _orderService.GetOrdersByUserId(paginationParameters, userId);
+    }
+
+    [ErrorHandler]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpGet("{id}")]
     public async Task<OrderDTO> GetOrder(Guid id)
     {
@@ -29,15 +38,15 @@ namespace backend.API.Controllers
     }
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpPost]
-    public async Task<OrderDTO> CreateOrder([FromBody] OrderDTO order)
+    public async Task<OrderDTO> CreateOrder([FromBody] OrderEntity order)
     {
       return await _orderService.CreateOrder(order);
     }
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpPut("{id}")]
     public async Task<OrderDTO> UpdateOrder(Guid id, [FromBody] OrderDTO order)
     {
@@ -45,7 +54,7 @@ namespace backend.API.Controllers
     }
 
     [ErrorHandler]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Manager,User")]
     [HttpDelete("{id}")]
     public async Task<OrderDTO> DeleteOrder(Guid id)
     {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DataByPagination, PaginationParams, Product } from '../../interfaces';
+import { DataByPagination, PaginationParams, Product, ProductSales } from '../../interfaces';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -17,15 +17,15 @@ export class ProductsService {
   }
 
   getProductsByCount(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/count-more-than`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: { ...params, count: 100, directionCount: true } });
   }
 
   getProductsByPrice(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-than`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: { ...params, price: 250, directionPrice: true  } });
   }
 
   getFilteredProducts(params: PaginationParams): Observable<DataByPagination<Product[]>> {
-    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/price-more-count-less`, { params: { ...params } });
+    return this.http.get<DataByPagination<Product[]>>(`${this.apiUrl}/GetByValues`, { params: {  ...params, price: 100, directionPrice: false, count: 50, directionCount: true  } });
   }
 
   createProduct(product: Product): Observable<Product> {
@@ -36,7 +36,11 @@ export class ProductsService {
     return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product);
   }
 
-  deleteProduct(productId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${productId}`);
+  deleteProduct(productId: string): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/${productId}`);
+  }
+
+  getProductsSales(): Observable<ProductSales[]> {
+    return this.http.get<ProductSales[]>(`${this.apiUrl}/Sales`);
   }
 }

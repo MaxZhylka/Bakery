@@ -17,12 +17,12 @@ export class GetUsersFail {
 
 export class CreateUser {
   static readonly type = '[Users] Create User';
-  constructor(public user: User) {}
+  constructor(public user: User, public paginationParams: PaginationParams) {}
 }
 
 export class CreateUserSuccess {
   static readonly type = '[Users] Create User Success';
-  constructor(public user: User) {}
+  constructor(public user: User, public paginationParams: PaginationParams) {}
 }
 
 export class CreateUserFail {
@@ -32,12 +32,12 @@ export class CreateUserFail {
 
 export class UpdateUser {
   static readonly type = '[Users] Update User';
-  constructor(public user: User) {}
+  constructor(public user: User, public paginationParams: PaginationParams) {}
 }
 
 export class UpdateUserSuccess {
   static readonly type = '[Users] Update User Success';
-  constructor(public user: User) {}
+  constructor(public user: User, public paginationParams: PaginationParams) {}
 }
 
 export class UpdateUserFail {

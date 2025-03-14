@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
-import { DataByPagination, ICreateOrder, PaginationParams, Product } from '../../interfaces';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { DataByPagination, ICreateOrder, PaginationParams, Product, Roles, User } from '../../interfaces';
+import { filter, Observable, Subject, take, takeUntil } from 'rxjs';
 import { GetProducts, GetProductsWhereCountMoreThan100, GetProductsWhereCountMoreThan50AndPriceLessThan100, GetProductsWherePriceMoreThan250, CreateProduct, UpdateProduct, DeleteProduct } from '../../store/products.actions';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateProductComponent } from '../create-product/create-product.component';
 import { CreateOrderComponent } from '../create-order/create-order.component';
 import { CreateOrder } from '../../store/orders.actions';
+import { UserState } from '../../store/app.state';
+import { ProductsState } from '../../store/products.state';
 
 export enum OrderRequestTypes {
   COUNT_MORE_THAN_100 = "Продукти, яких більше 100",
@@ -33,31 +35,39 @@ export class ProductsComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   public displayedColumns: string[] = ['name', 'price', 'count', 'createdAt', 'actions'];
-  public dataSource: Product[] = [ {
+  public dataSource: Product[] = [{
     id: '1',
     name: 'Шоколадний торт',
     price: 450,
-    count: 5,
+    productCount: 5,
     createdAt: '2025-02-16T10:30:00.000Z'
   },
   {
     id: '2',
     name: 'Фруктовий рулет',
     price: 320,
-    count: 3,
+    productCount: 3,
     createdAt: '2025-02-16T11:15:00.000Z'
   },];
   public paginationParams: PaginationParams = { size: 10, offset: 0 };
   public products$!: Observable<DataByPagination<Product[]>>;
-  public requestTypes = Object.values(OrderRequestTypes);;
+  public requestTypes = Object.values(OrderRequestTypes);
+  public totalProductCount: number = 0;
+  public user$!: Observable<User | null>;
+  public userData!: User | null;
+  public role = Roles;
+
   private readonly destroy$: Subject<void> = new Subject<void>();
+
   constructor(private readonly store: Store,
     private readonly dialog: MatDialog) { }
 
   public ngOnInit(): void {
-    this.products$ = this.store.select(state => state.product.products);
     this.store.dispatch(new GetProducts(this.paginationParams));
-    this.products$.pipe(takeUntil(this.destroy$)).subscribe((value) => { this.dataSource = value.data });
+    this.products$ = this.store.select(ProductsState.products);
+    this.products$.pipe(takeUntil(this.destroy$)).subscribe((value) => { this.dataSource = value.data; this.totalProductCount = value.total });
+    this.user$ = this.store.select(UserState.currentUser);
+    this.user$.pipe(filter((user) => Boolean(user)), take(1)).subscribe((user) => this.userData = user);
   }
 
   public onPageChange(event: PageEvent): void {
@@ -71,8 +81,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public deleteProduct(product: Product) { 
-    this.store.dispatch(new DeleteProduct(product.id));
+  public deleteProduct(product: Product) {
+    this.store.dispatch(new DeleteProduct(product.id, this.paginationParams));
   };
 
   public getNewData(event: MatSelectChange): void {
@@ -98,7 +108,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: Product | undefined) => {
       if (result) {
-        this.store.dispatch(new CreateProduct(result));
+        this.store.dispatch(new CreateProduct(result, this.paginationParams));
       }
     });
   }
@@ -112,7 +122,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: Product | undefined) => {
       if (result) {
-        this.store.dispatch(new UpdateProduct(result));
+        this.store.dispatch(new UpdateProduct(result, this.paginationParams));
       }
     });
   }
@@ -126,7 +136,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: ICreateOrder) => {
       if (result) {
-        this.store.dispatch(new CreateOrder(result));
+        this.store.dispatch(new CreateOrder(result, this.paginationParams));
       }
     });
   }

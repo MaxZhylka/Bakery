@@ -23,16 +23,48 @@ public class AuthController(IAuthService authService) : ControllerBase
     Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
     Response.Cookies.Append("DeviceId", tokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
+      Expires = DateTime.UtcNow.AddDays(30)
+    });
+
+    return new UserDTO
+    {
+      Id = tokens.Id,
+      Email = tokens.Email,
+      Name = tokens.Name,
+      Role = tokens.Role,
+      AccessToken = tokens.AccessToken
+    };
+  }
+
+  [ErrorHandler]
+  [HttpPost("Register")]
+  public async Task<UserDTO> Register([FromBody] RegisterCredentialsEntity credentials)
+  {
+    UserTokensDTO tokens = await _authService.Register(credentials);
+
+    Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
+      Expires = DateTime.UtcNow.AddDays(30)
+    });
+
+    Response.Cookies.Append("DeviceId", tokens.DeviceId, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -58,16 +90,16 @@ public class AuthController(IAuthService authService) : ControllerBase
     Response.Cookies.Append("RefreshToken", userWithTokens.RefreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
     Response.Cookies.Append("DeviceId", userWithTokens.DeviceId, new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
+      Secure = false,
+      SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
       Expires = DateTime.UtcNow.AddDays(30)
     });
 
@@ -81,9 +113,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     };
   }
 
+  [Authorize]
   [ErrorHandler]
-  [Authorize(Roles = "Admin,Manager")]
-  [HttpPost("Logout")]
+  [HttpGet("Logout")]
   public async Task<IActionResult> Logout()
   {
     string? refreshToken = HttpContext.Request.Cookies["RefreshToken"];

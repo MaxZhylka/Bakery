@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
-import { State, Action, StateContext, Store } from '@ngxs/store';
+import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { ProductsService } from '../services/product-service/product.service';
 import {
   GetProducts, GetProductsWhereCountMoreThan100, GetProductsWherePriceMoreThan250, GetProductsWhereCountMoreThan50AndPriceLessThan100,
-  CreateProduct, UpdateProduct, DeleteProduct
+  CreateProduct, UpdateProduct, DeleteProduct,
+  GetProductsSales
 } from './products.actions';
-import { DataByPagination, Product } from '../interfaces';
+import { DataByPagination, Product, ProductSales } from '../interfaces';
 import { catchError, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SetLoading } from './app.actions';
 
 export interface ProductsStateModel {
   products: DataByPagination<Product[]>;
+  productsSales: ProductSales[];
   error: string | null;
 }
 
@@ -20,6 +22,7 @@ export interface ProductsStateModel {
   name: 'products',
   defaults: {
     products: { data: [], total: 0 },
+    productsSales: [],
     error: null,
   }
 })
@@ -30,6 +33,16 @@ export class ProductsState {
     private readonly store: Store,
     private readonly snackBar: MatSnackBar
   ) { }
+
+  @Selector()
+  static products(state: ProductsStateModel): DataByPagination<Product[]> {
+    return state.products;
+  }
+
+  @Selector()
+  static productsSales(state: ProductsStateModel): ProductSales[] {
+    return state.productsSales;
+  }
 
   @Action(GetProducts)
   getProducts(ctx: StateContext<ProductsStateModel>, { paginationParams }: GetProducts) {
@@ -87,10 +100,10 @@ export class ProductsState {
   }
 
   @Action(CreateProduct)
-  createProduct(ctx: StateContext<ProductsStateModel>, { product }: CreateProduct) {
+  createProduct(ctx: StateContext<ProductsStateModel>, { product, paginationParams }: CreateProduct) {
     this.store.dispatch(new SetLoading(true));
     return this.productsService.createProduct(product).pipe(
-      tap(() => this.snackBar.open('Продукт створено', 'Закрити', { duration: 3000 })),
+      tap(() => { this.snackBar.open('Продукт створено', 'Закрити', { duration: 3000 }); this.store.dispatch(new GetProducts(paginationParams)) }),
       catchError(error => {
         this.snackBar.open('Помилка створення продукту', 'Закрити', { duration: 3000 });
         return of();
@@ -100,10 +113,10 @@ export class ProductsState {
   }
 
   @Action(UpdateProduct)
-  updateProduct(ctx: StateContext<ProductsStateModel>, { product }: UpdateProduct) {
+  updateProduct(ctx: StateContext<ProductsStateModel>, { product, paginationParams }: UpdateProduct) {
     this.store.dispatch(new SetLoading(true));
     return this.productsService.updateProduct(product).pipe(
-      tap(() => this.snackBar.open('Продукт оновлено', 'Закрити', { duration: 3000 })),
+      tap(() => { this.snackBar.open('Продукт оновлено', 'Закрити', { duration: 3000 }); this.store.dispatch(new GetProducts(paginationParams)) }),
       catchError(error => {
         this.snackBar.open('Помилка оновлення продукту', 'Закрити', { duration: 3000 });
         return of();
@@ -113,12 +126,25 @@ export class ProductsState {
   }
 
   @Action(DeleteProduct)
-  deleteProduct(ctx: StateContext<ProductsStateModel>, { productId }: DeleteProduct) {
+  deleteProduct(ctx: StateContext<ProductsStateModel>, { productId, paginationParams }: DeleteProduct) {
     this.store.dispatch(new SetLoading(true));
     return this.productsService.deleteProduct(productId).pipe(
-      tap(() => this.snackBar.open('Продукт видалено', 'Закрити', { duration: 3000 })),
+      tap(() => { this.snackBar.open('Продукт видалено', 'Закрити', { duration: 3000 });; this.store.dispatch(new GetProducts(paginationParams)) }),
       catchError(error => {
         this.snackBar.open('Помилка видалення продукту', 'Закрити', { duration: 3000 });
+        return of();
+      }),
+      tap(() => this.store.dispatch(new SetLoading(false)))
+    );
+  }
+
+  @Action(GetProductsSales)
+  getProductsSales(ctx: StateContext<ProductsStateModel>): Observable<ProductSales[]> {
+    this.store.dispatch(new SetLoading(true));
+    return this.productsService.getProductsSales().pipe(
+      tap((productsSales) => ctx.patchState({ productsSales })),
+      catchError(error => {
+        this.snackBar.open('Помилка завантаження продажів продукту', 'Закрити', { duration: 3000 });
         return of();
       }),
       tap(() => this.store.dispatch(new SetLoading(false)))

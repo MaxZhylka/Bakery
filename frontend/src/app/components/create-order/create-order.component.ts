@@ -21,7 +21,7 @@ export class CreateOrderComponent {
   public form: FormGroup;
   public productPrice!: number;
   public currentUser$!: Observable<User | null>;
-  public customerName?: string = '';
+  public customerId?: string = '';
 
   constructor(
     private readonly dialogRef: MatDialogRef<CreateOrderComponent>,
@@ -38,7 +38,7 @@ export class CreateOrderComponent {
 
   public ngOnInit(): void {
     this.currentUser$ = this.store.select(UserState.currentUser);
-    this.currentUser$.subscribe(user => this.customerName = user?.name);
+    this.currentUser$.subscribe(user => this.customerId = user?.id);
 
     this.form.get('productCount')?.valueChanges.subscribe(count => {
       const totalPrice = count * this.productPrice;
@@ -47,12 +47,12 @@ export class CreateOrderComponent {
   }
 
   public onSubmit(): void {
-    if (this.form.valid && this.product.id && this.customerName) {
+    if (this.form.valid && this.product.id && this.customerId) {
       const order: ICreateOrder = {
         productId: this.product.id,
         productCount: this.form.value.productCount,
-        price: this.form.value.price,
-        customerName: this.customerName,
+        price: this.form.get('price')?.value ?? 0,
+        customerId: this.customerId,
       };
       this.dialogRef.close(order);
     }

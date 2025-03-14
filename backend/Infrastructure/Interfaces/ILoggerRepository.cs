@@ -9,7 +9,7 @@ namespace backend.Core.Interfaces
 
         Task<UserActionDTO[]> GetLogsByUserIdAsync(Guid userId);
 
-        Task<UserActionDTO[]> GetAllLogsAsync(PaginationParameters parameters);
+        Task<PaginatedResult<UserActionDTO>> GetAllLogsAsync(PaginationParameters parameters);
 
         Task<UserActionDTO> GetLogByIdAsync(Guid logId);
     }

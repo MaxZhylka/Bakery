@@ -54,7 +54,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
@@ -72,6 +72,7 @@ namespace backend.Infrastructure.Repositories
                         l.UserId,
                         u.UserName,
                         u.Email,
+                        u.Role,
                         l.Operation,
                         l.Details,
                         l.Timestamp
@@ -93,9 +94,10 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                     results.Add(dto);
                 }
@@ -108,11 +110,11 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
 
-        public async Task<UserActionDTO[]> GetAllLogsAsync(PaginationParameters parameters)
+        public async Task<PaginatedResult<UserActionDTO>> GetAllLogsAsync(PaginationParameters parameters)
         {
             try
             {
@@ -120,26 +122,35 @@ namespace backend.Infrastructure.Repositories
                 if (connection.State != ConnectionState.Open)
                     await connection.OpenAsync();
 
-                const string query = @"
-                    SELECT 
-                        l.Id,
-                        l.UserId,
-                        u.UserName,
-                        u.Email,
-                        l.Operation,
-                        l.Details,
-                        l.Timestamp
-                    FROM UserActionLogs l
-                    JOIN Users u ON l.UserId = u.Id
-                    ORDER BY l.Timestamp DESC
-                    OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
+                const string countQuery = @"
+            SELECT COUNT(*)
+            FROM UserActionLogs l
+            JOIN Users u ON l.UserId = u.Id";
 
-                using var command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Offset", (parameters.From - 1) * parameters.Size);
-                command.Parameters.AddWithValue("@Limit", parameters.Size);
+                using var countCommand = new SqlCommand(countQuery, connection);
+                int totalRecords = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
+
+                const string dataQuery = @"
+            SELECT 
+                l.Id,
+                l.UserId,
+                u.Name,
+                u.Email,
+                u.Role,
+                l.Operation,
+                l.Details,
+                l.Timestamp
+            FROM UserActionLogs l
+            JOIN Users u ON l.UserId = u.Id
+            ORDER BY l.Timestamp DESC
+            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
+
+                using var dataCommand = new SqlCommand(dataQuery, connection);
+                dataCommand.Parameters.AddWithValue("@Offset", parameters.Offset * parameters.Size);
+                dataCommand.Parameters.AddWithValue("@Limit", parameters.Size);
 
                 var results = new List<UserActionDTO>();
-                using var reader = await command.ExecuteReaderAsync();
+                using var reader = await dataCommand.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var dto = new UserActionDTO
@@ -148,14 +159,20 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                     results.Add(dto);
                 }
 
-                return results.ToArray();
+
+                return new PaginatedResult<UserActionDTO>
+                {
+                    Data = [.. results],
+                    Total = totalRecords,
+                };
             }
             catch (SqlException e)
             {
@@ -163,9 +180,10 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
+
 
         public async Task<UserActionDTO> GetLogByIdAsync(Guid logId)
         {
@@ -181,6 +199,7 @@ namespace backend.Infrastructure.Repositories
                         l.UserId,
                         u.UserName,
                         u.Email,
+                        u.Role,
                         l.Operation,
                         l.Details,
                         l.Timestamp
@@ -200,9 +219,10 @@ namespace backend.Infrastructure.Repositories
                         UserId = reader.GetGuid(1),
                         UserName = reader.GetString(2),
                         Email = reader.GetString(3),
-                        Operation = Enum.Parse<Operations>(reader.GetString(4)),
-                        Details = reader.GetString(5),
-                        Timestamp = reader.GetDateTime(6)
+                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
+                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
+                        Details = reader.GetString(6),
+                        Timestamp = reader.GetDateTime(7)
                     };
                 }
 
@@ -214,7 +234,7 @@ namespace backend.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error getting DB connection", e);
+                throw new Exception($"Error getting DB connection{e}");
             }
         }
     }

@@ -1,5 +1,5 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { CheckAuth, Login, LoginFail, LoginSuccess, Register, RegisterFail, RegisterSuccess, SetLoading, SetUser } from './app.actions';
+import { CheckAuth, Login, LoginFail, LoginSuccess, Logout, LogoutFail, LogoutSuccess, Register, RegisterFail, RegisterSuccess, SetLoading, SetUser } from './app.actions';
 import { AppStateModel, User, UserStateModel } from '../interfaces';
 import { Inject, Injectable } from '@angular/core';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBar } from '@angular/material/snack-bar';
@@ -55,7 +55,6 @@ export class UserState {
 
         return this.authService.login(action.payload).pipe(
             tap((response) => {
-                console.log(response);
                 ctx.dispatch(new LoginSuccess(response));
             }),
             catchError((error) => {
@@ -81,18 +80,17 @@ export class UserState {
     }
 
     @Action(LoginSuccess)
-    loginSuccess(ctx: StateContext<UserStateModel>, {user}: LoginSuccess) {
-        console.log(user);
+    loginSuccess(ctx: StateContext<UserStateModel>, { user }: LoginSuccess) {
         ctx.patchState({ currentUser: user });
         ctx.dispatch(new SetLoading(false));
         this.router.navigate(['']);
-        this.snackBar.open('Login successful!', 'Close', { panelClass: 'success-snackbar' });
+        this.snackBar.open('Login successful!', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
     }
 
     @Action(LoginFail)
     loginFail(ctx: StateContext<UserStateModel>, action: LoginFail) {
         ctx.dispatch(new SetLoading(false));
-        this.snackBar.open(action.payload, 'Close', { panelClass: 'error-snackbar' });
+        this.snackBar.open(action.payload, 'Close', { panelClass: 'error-snackbar', duration: 3000 });
     }
 
     @Action(RegisterSuccess)
@@ -102,12 +100,12 @@ export class UserState {
         ctx.patchState({
             currentUser: action.payload
         });
-        this.snackBar.open('Registration successful!', 'Close', { panelClass: 'success-snackbar' });
+        this.snackBar.open('Registration successful!', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
     }
 
     @Action(RegisterFail)
     registerFail(ctx: StateContext<UserStateModel>, action: RegisterFail) {
-        this.snackBar.open(action.payload, 'Close', { panelClass: 'error-snackbar' });
+        this.snackBar.open(action.payload, 'Close', { panelClass: 'error-snackbar', duration: 3000 });
         ctx.dispatch(new SetLoading(false));
     }
 
@@ -131,4 +129,24 @@ export class UserState {
         ctx.patchState({ currentUser: action.payload });
     }
 
+    @Action(Logout)
+    logout(ctx: StateContext<UserStateModel>) {
+        ctx.patchState({ currentUser: null });
+        return this.authService.logout().pipe(tap(() => { ctx.dispatch(new LogoutSuccess()) }),
+            catchError((error) => {
+                ctx.dispatch(new LogoutFail());
+                return of(null);
+            }));
+    }
+
+    @Action(LogoutSuccess)
+    logoutSuccess(ctx: StateContext<UserStateModel>) {
+        this.router.navigate(['/login']);
+        this.snackBar.open('Ви успішно вийшли з аккаунту', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
+    }
+
+    @Action(LogoutFail)
+    logoutFail(ctx: StateContext<UserStateModel>) {
+        this.snackBar.open('Помилка виходу', 'Close', { panelClass: 'error-snackbar', duration: 3000 });
+    }
 }

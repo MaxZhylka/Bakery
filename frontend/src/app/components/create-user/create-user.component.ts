@@ -26,7 +26,8 @@ export class CreateUserComponent {
   public isEditMode: boolean;
   public roles = [
     { value: 'Admin', viewValue: 'Адміністратор' },
-    { value: 'Manager', viewValue: 'Менеджер' }
+    { value: 'Manager', viewValue: 'Менеджер' },
+    { value: 'User', viewValue: 'Користувач' }
   ];
 
   constructor(
@@ -36,15 +37,17 @@ export class CreateUserComponent {
   ) {
     this.isEditMode = !!data;
 
-    this.form = this.fb.group({
+    const formConfig: { [key: string]: any } = {
       name: [data?.name ?? '', Validators.required],
       role: [data?.role ?? '', Validators.required],
       email: [data?.email ?? '', [Validators.required, Validators.email]],
-      password: [
-        '', 
-        [Validators.required, Validators.minLength(6)]
-      ],
-    });
+    };
+  
+    if (!this.isEditMode) {
+      formConfig['password'] = ['', [Validators.required, Validators.minLength(6)]];
+    }
+  
+    this.form = this.fb.group(formConfig);
   }
 
   public onSubmit(): void {

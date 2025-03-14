@@ -7,7 +7,7 @@ namespace backend.Core.Interfaces
   {
     Task<UserDTO> GetUser(Guid id);
 
-    Task<IEnumerable<UserDTO>> GetUsers();
+    Task<PaginatedResult<UserDTO>> GetUsers(PaginationParameters paginationParameters);
 
     Task<UserDTO> DeleteUser(Guid id);
 
