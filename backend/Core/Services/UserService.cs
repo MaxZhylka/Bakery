@@ -7,16 +7,14 @@ using Microsoft.AspNetCore.Identity;
 
 namespace backend.Core.Services
 {
-    public class UserService(IUserRepository userRepository, IMapper mapper) : IUserService
+    public class UserService(IUserRepository userRepository) : IUserService
     {
         private readonly IUserRepository _userRepository = userRepository;
-        private readonly IMapper _mapper = mapper;
 
         private readonly PasswordHasher<string> _passwordHasher = new();
         public async Task<UserDTO> GetUser(Guid id)
         {
-            var user = await _userRepository.GetUserAsync(id);
-            return _mapper.Map<UserDTO>(user);
+            return  await _userRepository.GetUserAsync(id);
         }
 
         public async Task<PaginatedResult<UserDTO>> GetUsers(PaginationParameters paginationParameters)
@@ -27,8 +25,7 @@ namespace backend.Core.Services
 
         public async Task<UserDTO> DeleteUser(Guid id)
         {
-            var deletedUser = await _userRepository.DeleteUserAsync(id);
-            return _mapper.Map<UserDTO>(deletedUser);
+            return await _userRepository.DeleteUserAsync(id);
         }
 
         public async Task<UserDTO> UpdateUser(Guid id, UserDTO user)
@@ -40,7 +37,7 @@ namespace backend.Core.Services
         {
 
             var hashedPassword = _passwordHasher.HashPassword(user.Email, user.Password);
-            var userEntity = new UserEntity
+            var userEntity = new UserWithCredentialsDTO
             {
                 Id = Guid.NewGuid(),
                 Name = user.Name,
@@ -49,8 +46,7 @@ namespace backend.Core.Services
                 Role = user.Role,
                 CreatedAt = DateTime.Now
             };
-            var createdUser = await _userRepository.CreateUserAsync(userEntity);
-            return _mapper.Map<UserDTO>(createdUser);
+            return await _userRepository.CreateUserAsync(userEntity);
         }
     }
 }

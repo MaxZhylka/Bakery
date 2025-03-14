@@ -1,11 +1,12 @@
 using backend.Core.DTOs;
+using backend.Core.Entities;
 using backend.Core.Models;
 
 namespace backend.Core.Interfaces
 {
     public interface ILoggerRepository
     {
-        Task<UserActionLog> SaveLogAsync(UserActionLog log);
+        Task<UserActionLog> SaveLogAsync(UserActionDTO log);
 
         Task<UserActionDTO[]> GetLogsByUserIdAsync(Guid userId);
 

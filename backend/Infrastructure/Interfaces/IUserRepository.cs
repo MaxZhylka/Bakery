@@ -9,6 +9,6 @@ namespace backend.Infrastructure.Interfaces
         Task<PaginatedResult<UserDTO>> GetUsersAsync(PaginationParameters paginationParameters);
         Task<UserDTO> DeleteUserAsync(Guid id);
         Task<UserDTO> UpdateUserAsync(Guid id, UserDTO user);
-        Task<UserDTO> CreateUserAsync(UserEntity user);
+        Task<UserDTO> CreateUserAsync(UserWithCredentialsDTO user);
     }
 }

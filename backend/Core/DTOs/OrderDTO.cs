@@ -6,6 +6,7 @@ namespace backend.Core.DTOs
     public required Guid ProductId { get; set; }
 
     public string? ProductName { get; set; }
+    
     public required decimal Price { get; set; }
     public required int ProductCount { get; set; }
     public DateTime? CreatedAt { get; set; }

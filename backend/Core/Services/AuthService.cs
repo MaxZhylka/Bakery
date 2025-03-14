@@ -10,6 +10,7 @@ using backend.Core.Enums;
 using backend.Core.Models;
 using backend.Infrastructure.Repositories;
 using System.Runtime.CompilerServices;
+using backend.Core.Entities;
 
 public class AuthService(IAuthRepository authRepository, ILoggerRepository loggerRepository, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor) : IAuthService
 {
@@ -47,7 +48,7 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
     var sanitizedIp = remoteIpAddress != null && !remoteIpAddress.IsIPv4MappedToIPv6
         ? remoteIpAddress.ToString()
         : "Invalid IP";
-    _ = _loggerRepository.SaveLogAsync(new UserActionLog
+    _ = _loggerRepository.SaveLogAsync(new UserActionDTO
     {
       Id = Guid.NewGuid(),
       UserId = user.Id,
@@ -73,7 +74,7 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
 
     var hashedPassword = _passwordHasher.HashPassword(credentials.Email, credentials.Password);
     UserDTO user = await _userRepository.CreateUserAsync(
-      new UserEntity
+      new UserWithCredentialsDTO
       {
         Id = Guid.NewGuid(),
         Name = credentials.Name,
@@ -95,7 +96,7 @@ public class AuthService(IAuthRepository authRepository, ILoggerRepository logge
     var sanitizedIp = remoteIpAddress != null && !remoteIpAddress.IsIPv4MappedToIPv6
         ? remoteIpAddress.ToString()
         : "Invalid IP";
-    _ = _loggerRepository.SaveLogAsync(new UserActionLog
+    _ = _loggerRepository.SaveLogAsync(new UserActionDTO
     {
       Id = Guid.NewGuid(),
       UserId = user.Id,

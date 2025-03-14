@@ -1,6 +1,6 @@
 using backend.Core.Enums;
 
-namespace backend.Core.Models
+namespace backend.Core.Entities
 {
     public class UserActionLog
     {
@@ -9,5 +9,6 @@ namespace backend.Core.Models
         public Operations Operation { get; set; }
         public required string Details { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public User User { get; set; } = null!;
     }
 }

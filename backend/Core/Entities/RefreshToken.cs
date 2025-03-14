@@ -1,7 +1,7 @@
 
-namespace backend.Core.Models
+namespace backend.Core.Entities
 {
-  public class RefreshTokenEntity
+  public class RefreshTokens
   {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
@@ -9,6 +9,7 @@ namespace backend.Core.Models
 
     public DateTime Expiration { get; set; }
     public required string DeviceId { get; set; }
+    public User User { get; set; } = null!;
   }
 
 }

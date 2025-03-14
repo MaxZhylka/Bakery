@@ -7,10 +7,10 @@ namespace backend.Core.DTOs
   {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public required string UserName { get; set; }
+    public string UserName { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public required UserRole UserRole { get; set; }
-    public required string Email { get; set; }
+    public UserRole UserRole { get; set; }
+    public string Email { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public Operations Operation { get; set; }
     public required string Details { get; set; }

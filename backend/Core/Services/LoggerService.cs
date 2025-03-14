@@ -26,7 +26,7 @@ namespace backend.Core.Services
 
     public Task LogAction(Guid userId, Operations operation, string details)
     {
-      UserActionLog userActionLog = new() { UserId = userId, Operation = operation, Details = details };
+      UserActionDTO userActionLog = new() { UserId = userId, Operation = operation, Details = details };
       _ = _loggerRepository.SaveLogAsync(userActionLog);
       return Task.CompletedTask;
     }

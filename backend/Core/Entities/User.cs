@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using backend.Core.Attributes;
 using backend.Core.Enums;
 
-namespace backend.Core.Models
+namespace backend.Core.Entities
 {
-    public class UserEntity
+    public class User
     {
         public Guid Id { get; set; }
 
@@ -24,5 +24,10 @@ namespace backend.Core.Models
 
         public DateTime CreatedAt { get; set; }
 
+        public List<Loan> Loans { get; set; } = new();
+        public List<LoanApplication> LoanApplications { get; set; } = new();
+        public List<Payment> Payments { get; set; } = new();
+        public List<RefreshTokens> RefreshTokens { get; set; } = new();
+        public List<UserActionLog> ActionLogs { get; set; } = new();
     }
 }

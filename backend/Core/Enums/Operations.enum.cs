@@ -26,6 +26,20 @@ namespace backend.Core.Enums
     GetLog,
     GetAllLogs,
     GetLogById,
-    GetLogsByUserID
+    GetLogsByUserID,
+    DeleteLoan,
+    UpdateLoan,
+    CreateLoan,
+    GetLoans,
+    GetLoan,
+    GetLoanApplication,
+    GetLoanApplications,
+    CreateLoanApplication,
+    UpdateLoanApplication,
+    DeleteLoanApplication,
+    DeletePayment,
+    UpdatePayment,
+    CreatePayment,
+    GetPayment,
   }
 }

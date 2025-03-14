@@ -1,18 +1,18 @@
 using backend.Core.DTOs;
-using backend.Core.Models;
+using backend.Core.Entities;
 
 namespace backend.Infrastructure.Interfaces
 {
     public interface IAuthRepository
     {
-        Task<UserEntity> GetUserByEmailAsync(string email);
-        Task<UserEntity> GetUserByRefreshTokenAsync(string refreshToken);
-        Task<RefreshTokenEntity> SaveRefreshTokenAsync(Guid userId, string refreshToken, string deviceId);
+        Task<User> GetUserByEmailAsync(string email);
+        Task<User> GetUserByRefreshTokenAsync(string refreshToken);
+        Task<RefreshTokens> SaveRefreshTokenAsync(Guid userId, string refreshToken, string deviceId);
 
         Task<UserDTO?> CheckTokenAsync(string refreshToken, string deviceId);
         Task<bool> CheckTokenByDeviceIdAsync(string deviceId);
-        Task<RefreshTokenEntity> UpdateRefreshTokenAsync(string oldRefreshToken, string refreshToken, string deviceId);
-        Task<RefreshTokenEntity> UpdateRefreshTokenByIdAsync(Guid userId, string refreshToken, string oldDeviceId, string deviceId);
+        Task<RefreshTokens> UpdateRefreshTokenAsync(string oldRefreshToken, string refreshToken, string deviceId);
+        Task<RefreshTokens> UpdateRefreshTokenByIdAsync(Guid userId, string refreshToken, string oldDeviceId, string deviceId);
         Task DeleteRefreshTokenAsync(string refreshToken);
     }
 }

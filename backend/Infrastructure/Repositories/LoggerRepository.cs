@@ -1,241 +1,113 @@
-using System.Data;
 using backend.Core.DTOs;
+using backend.Core.Entities;
 using backend.Core.Enums;
 using backend.Core.Interfaces;
 using backend.Core.Models;
-using backend.Infrastructure.Interfaces;
+using backend.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 using Core.Exceptions;
-using Microsoft.Data.SqlClient;
 
 namespace backend.Infrastructure.Repositories
 {
-    public class LoggerRepository(IDBConnectionFactory connectionFactory) : ILoggerRepository
+    public class LoggerRepository : ILoggerRepository
     {
-        private readonly IDBConnectionFactory connectionFactory = connectionFactory;
+        private readonly AppDbContext _context;
 
-        public async Task<UserActionLog> SaveLogAsync(UserActionLog log)
+        public LoggerRepository(AppDbContext context)
         {
-            try
+            _context = context;
+        }
+
+        public async Task<UserActionLog> SaveLogAsync(UserActionDTO logDTO)
+        {
+            var log = new UserActionLog
             {
-                using var connection = connectionFactory.CreateConnection();
-                if (connection.State != ConnectionState.Open)
-                    await connection.OpenAsync();
+                Id = Guid.NewGuid(),
+                UserId = logDTO.UserId,
+                Operation = logDTO.Operation,
+                Details = logDTO.Details,
+                Timestamp = DateTime.UtcNow
+            };
 
-                const string query = @"
-                    INSERT INTO UserActionLogs (Id, UserId, Operation, Details, Timestamp) 
-                    OUTPUT INSERTED.Id, INSERTED.UserId, INSERTED.Operation, INSERTED.Details, INSERTED.Timestamp
-                    VALUES (@Id, @UserId, @Operation, @Details, @Timestamp)";
+            _context.UserActionLogs.Add(log);
+            await _context.SaveChangesAsync();
 
-                using var command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", log.Id);
-                command.Parameters.AddWithValue("@UserId", log.UserId);
-                command.Parameters.AddWithValue("@Operation", log.Operation.ToString());
-                command.Parameters.AddWithValue("@Details", log.Details);
-                command.Parameters.AddWithValue("@Timestamp", log.Timestamp);
-
-                using var reader = await command.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    return new UserActionLog
-                    {
-                        Id = reader.GetGuid(0),
-                        UserId = reader.GetGuid(1),
-                        Operation = Enum.Parse<Operations>(reader.GetString(2)),
-                        Details = reader.GetString(3),
-                        Timestamp = reader.GetDateTime(4)
-                    };
-                }
-
-                throw new LogCreationException();
-            }
-            catch (SqlException e)
-            {
-                throw new DatabaseOperationException(Operations.SaveLog, e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Error getting DB connection{e}");
-            }
+            return log;
         }
 
         public async Task<UserActionDTO[]> GetLogsByUserIdAsync(Guid userId)
         {
-            try
-            {
-                using var connection = connectionFactory.CreateConnection();
-                if (connection.State != ConnectionState.Open)
-                    await connection.OpenAsync();
-
-                const string query = @"
-                    SELECT 
-                        l.Id,
-                        l.UserId,
-                        u.UserName,
-                        u.Email,
-                        u.Role,
-                        l.Operation,
-                        l.Details,
-                        l.Timestamp
-                    FROM UserActionLogs l
-                    JOIN Users u ON l.UserId = u.Id
-                    WHERE l.UserId = @UserId
-                    ORDER BY l.Timestamp DESC";
-
-                using var command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@UserId", userId);
-
-                var results = new List<UserActionDTO>();
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+            var logs = await _context.UserActionLogs
+                .Include(l => l.User)
+                .Where(l => l.UserId == userId)
+                .OrderByDescending(l => l.Timestamp)
+                .Select(log => new UserActionDTO
                 {
-                    var dto = new UserActionDTO
-                    {
-                        Id = reader.GetGuid(0),
-                        UserId = reader.GetGuid(1),
-                        UserName = reader.GetString(2),
-                        Email = reader.GetString(3),
-                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
-                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
-                        Details = reader.GetString(6),
-                        Timestamp = reader.GetDateTime(7)
-                    };
-                    results.Add(dto);
-                }
+                    Id = log.Id,
+                    UserId = log.UserId,
+                    UserName = log.User.Name,
+                    Email = log.User.Email,
+                    UserRole = log.User.Role,
+                    Operation = log.Operation,
+                    Details = log.Details,
+                    Timestamp = log.Timestamp
+                })
+                .ToArrayAsync();
 
-                return results.ToArray();
-            }
-            catch (SqlException e)
-            {
-                throw new DatabaseOperationException(Operations.GetLogsByUserID, e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Error getting DB connection{e}");
-            }
+            return logs;
         }
 
         public async Task<PaginatedResult<UserActionDTO>> GetAllLogsAsync(PaginationParameters parameters)
         {
-            try
-            {
-                using var connection = connectionFactory.CreateConnection();
-                if (connection.State != ConnectionState.Open)
-                    await connection.OpenAsync();
+            var query = _context.UserActionLogs
+                .Include(l => l.User)
+                .OrderByDescending(l => l.Timestamp);
 
-                const string countQuery = @"
-            SELECT COUNT(*)
-            FROM UserActionLogs l
-            JOIN Users u ON l.UserId = u.Id";
+            var totalRecords = await query.CountAsync();
 
-                using var countCommand = new SqlCommand(countQuery, connection);
-                int totalRecords = (int)(await countCommand.ExecuteScalarAsync() ?? 0);
-
-                const string dataQuery = @"
-            SELECT 
-                l.Id,
-                l.UserId,
-                u.Name,
-                u.Email,
-                u.Role,
-                l.Operation,
-                l.Details,
-                l.Timestamp
-            FROM UserActionLogs l
-            JOIN Users u ON l.UserId = u.Id
-            ORDER BY l.Timestamp DESC
-            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
-
-                using var dataCommand = new SqlCommand(dataQuery, connection);
-                dataCommand.Parameters.AddWithValue("@Offset", parameters.Offset * parameters.Size);
-                dataCommand.Parameters.AddWithValue("@Limit", parameters.Size);
-
-                var results = new List<UserActionDTO>();
-                using var reader = await dataCommand.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+            var logs = await query
+                .Skip(parameters.Offset * parameters.Size)
+                .Take(parameters.Size)
+                .Select(log => new UserActionDTO
                 {
-                    var dto = new UserActionDTO
-                    {
-                        Id = reader.GetGuid(0),
-                        UserId = reader.GetGuid(1),
-                        UserName = reader.GetString(2),
-                        Email = reader.GetString(3),
-                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
-                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
-                        Details = reader.GetString(6),
-                        Timestamp = reader.GetDateTime(7)
-                    };
-                    results.Add(dto);
-                }
+                    Id = log.Id,
+                    UserId = log.UserId,
+                    UserName = log.User.Name,
+                    Email = log.User.Email,
+                    UserRole = log.User.Role,
+                    Operation = log.Operation,
+                    Details = log.Details,
+                    Timestamp = log.Timestamp
+                })
+                .ToListAsync();
 
-
-                return new PaginatedResult<UserActionDTO>
-                {
-                    Data = [.. results],
-                    Total = totalRecords,
-                };
-            }
-            catch (SqlException e)
+            return new PaginatedResult<UserActionDTO>
             {
-                throw new DatabaseOperationException(Operations.GetAllLogs, e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Error getting DB connection{e}");
-            }
+                Data = logs,
+                Total = totalRecords,
+            };
         }
-
 
         public async Task<UserActionDTO> GetLogByIdAsync(Guid logId)
         {
-            try
+            var log = await _context.UserActionLogs
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.Id == logId);
+
+            if (log == null)
+                throw new DatabaseOperationException(Operations.GetLog, new Exception("Log not found"));
+
+            return new UserActionDTO
             {
-                using var connection = connectionFactory.CreateConnection();
-                if (connection.State != ConnectionState.Open)
-                    await connection.OpenAsync();
-
-                const string query = @"
-                    SELECT 
-                        l.Id,
-                        l.UserId,
-                        u.UserName,
-                        u.Email,
-                        u.Role,
-                        l.Operation,
-                        l.Details,
-                        l.Timestamp
-                    FROM UserActionLogs l
-                    JOIN Users u ON l.UserId = u.Id
-                    WHERE l.Id = @Id";
-
-                using var command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", logId);
-
-                using var reader = await command.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    return new UserActionDTO
-                    {
-                        Id = reader.GetGuid(0),
-                        UserId = reader.GetGuid(1),
-                        UserName = reader.GetString(2),
-                        Email = reader.GetString(3),
-                        UserRole = Enum.Parse<UserRole>(reader.GetString(4)),
-                        Operation = Enum.Parse<Operations>(reader.GetString(5)),
-                        Details = reader.GetString(6),
-                        Timestamp = reader.GetDateTime(7)
-                    };
-                }
-
-                throw new LogNotFoundException(logId);
-            }
-            catch (SqlException e)
-            {
-                throw new DatabaseOperationException(Operations.GetLog, e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Error getting DB connection{e}");
-            }
+                Id = log.Id,
+                UserId = log.UserId,
+                UserName = log.User.Name,
+                Email = log.User.Email,
+                UserRole = log.User.Role,
+                Operation = log.Operation,
+                Details = log.Details,
+                Timestamp = log.Timestamp
+            };
         }
     }
 }

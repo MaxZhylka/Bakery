@@ -1,21 +1,27 @@
 
-using backend.Infrastructure.Interfaces;
-using Microsoft.Data.SqlClient;
+using backend.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace backend.Infrastructure.Database
 {
-  public class DBConnectionFactory : IDBConnectionFactory
-  {
-    private readonly string _connectionString;
-    public DBConnectionFactory()
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
     {
-      _connectionString = "Server=192.168.0.104,1433;Database=Lab_4;User ID=flameplay;Password=1234;TrustServerCertificate=True;" ?? throw new ArgumentNullException("DefaultConnection string is null");
     }
 
-    public SqlConnection CreateConnection()
+    public DbSet<Loan> Loans { get; set; }
+    public DbSet<LoanApplication> LoanApplications { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<RefreshTokens> RefreshTokens { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<UserActionLog> UserActionLogs { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      return new SqlConnection(_connectionString);
+        base.OnModelCreating(modelBuilder);
     }
-  }
+}
 }
