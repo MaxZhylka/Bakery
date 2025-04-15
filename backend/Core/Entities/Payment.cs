@@ -1,3 +1,4 @@
+
 using backend.Core.Enums;
 
 namespace backend.Core.Entities
@@ -6,6 +7,8 @@ namespace backend.Core.Entities
   {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+
+    public Guid LoanId { get; set; }
 
     public int Value { get; set; }
 

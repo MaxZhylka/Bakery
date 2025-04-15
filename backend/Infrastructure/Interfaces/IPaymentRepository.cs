@@ -7,7 +7,8 @@ namespace backend.Infrastructure.Repositories
     {
         Task<PaymentDTO> GetPaymentAsync(Guid id);
         Task<PaginatedResult<PaymentDTO>> GetPaymentsAsync(PaginationParameters parameters);
-        Task<PaymentDTO> CreatePaymentAsync(PaymentDTO paymentDto);
+        Task<PaginatedResult<PaymentDTO>> GetPaymentsByUserIdAsync(Guid userId, PaginationParameters parameters);
+        Task<PaymentDTO> CreatePaymentAsync(CreatePaymentDTO paymentDto);
         Task<PaymentDTO> UpdatePaymentAsync(Guid id, PaymentDTO paymentDto);
         Task DeletePaymentAsync(Guid id);
     }

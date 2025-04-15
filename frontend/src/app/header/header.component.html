@@ -1,15 +1,39 @@
+@if (!userData) {
+  <header class="h-[100px] flex items-center justify-around w-full" >
+      <div class="w-[280px] flex justify-center">
+      <img src="assets/images/logo.png" alt="Logo" routerLink="" class="size-[100px] cursor-pointer"/>
+      </div>
+      <h1 class="font-[Pangolin] m-0 h-[80px] shrink-0 text-[80px]">МІКРО-ЗАЙМ!</h1>
+      <span class="flex items-center gap-[20px] ">
+        <a  mat-fab extended>
+          <mat-icon class="text-[28px] !size-[28px]">chat</mat-icon>
+          Підтримка</a>
+        <a mat-fab extended routerLink="login/">
+          <mat-icon class="text-[28px] !size-[28px]">login</mat-icon>
+          Увійти</a>
+      </span>
+  </header>
+}
+
 <mat-toolbar *ngIf="displayHeader() && userData" >
   <a mat-button routerLink="/">
-    <mat-icon>storefront</mat-icon>
-    Bakery
+    <mat-icon class="!text-[36px] !size-[40px]">assured_workload</mat-icon>
+    Мікрозайм!
   </a>
 
   <div class="nav-links" *ngIf="!isMobile">
     <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" routerLink="/users" mat-button>Користувачі</a>
     <a *ngIf="userData.role === roles.Admin" routerLink="/logs" mat-button>Журнал</a>
-    <a routerLink="/orders" mat-button>Замовлення</a>
-    <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-button routerLink="/products/dynamic">Динаміка продуктів</a>
-    <a routerLink="/products" mat-button>Продукти</a>
+    <a routerLink="/loan-applications" mat-button>Заявки на займ</a>
+    @if (userData.role === roles.User) {
+      <a routerLink="/loans" mat-button>Мої займи</a>
+      <a routerLink="/payments" mat-button>Мої оплати</a>
+    }
+    @else {
+      <a routerLink="/loans" mat-button>Займи</a>
+      <a routerLink="/payments" mat-button>Оплати</a>
+    }
+
   </div>
 
   <span class="spacer"></span>
@@ -31,9 +55,9 @@
   <mat-menu #burgerMenu="matMenu">
     <button *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-menu-item routerLink="/users">Користувачі</button>
     <button *ngIf="userData.role === roles.Admin" mat-menu-item routerLink="/logs">Журнал</button>
-    <button mat-menu-item routerLink="/orders">Замовлення</button>
-    <button mat-menu-item routerLink="/products">Продукти</button>
-    <button *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" mat-menu-item routerLink="/products/dynamic">Продукти</button>
+    <button mat-menu-item routerLink="/loan-applications">Заявки на займ</button>
+    <button mat-menu-item routerLink="/loans">Займи</button>
+    <button mat-menu-item routerLink="/payments">Оплати</button>
     <button mat-menu-item routerLink="/cabinet">Кабінет</button>
   </mat-menu>
 </mat-toolbar>

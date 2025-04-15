@@ -13,7 +13,7 @@ public class UsersController(IUserService userService) : ControllerBase
 
 
   [ErrorHandler]
-  [Authorize(Roles = "Admin")]
+
   [HttpPost]
   public async Task<UserDTO> CreateUser([FromBody] UserCreateDTO admin)
   {

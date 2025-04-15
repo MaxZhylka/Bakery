@@ -1,0 +1,64 @@
+<div class="w-[1067px] rounded-[20px] mb-0 h-[415px] flex flex-col">
+  <div class="flex py-[25px] px-[50px] rounded-t-[20px] text-[24px] flex-row bg-[#002626] justify-between ">
+    <div>
+      Дата оформлення <br/>
+      {{ loan.createdAt | date: 'dd.MM.yyyy' }}
+    </div>
+    <div>
+      Розмір займу <br/>
+      {{ loan.valueToPay | currency:'UAH':'symbol':'1.2-2':'uk-UA' }}
+    </div>
+    <div>
+      Відсоток <br/>
+      {{ loan.percent }}%
+    </div>
+    <div *ngIf="role === roles.Admin">
+      Пошта клієнта <br/>
+      {{ loan.clientEmail }}
+      
+    </div>
+  </div>
+  <div class="px-25px rounded-b-[20px] bg-[#003F3F] p-[25px] flex flex-col gap-[10px]">
+
+    <p class="m-0 text-[36px] font-bold">Cтатус: 
+      @switch (loan.status) {
+        @case (loanStatuses.NeedPayment) {
+          <span class="text-[#FF7777]">Потребує оплати</span>
+        }
+        @case (loanStatuses.GetMoney)
+        {
+          @if (role === roles.User) {
+            <span class="text-[#FFDB78]">Отримати кошти</span>
+          } @else {
+            <span class="text-[#FFDB78]">Ще не отримав кошти</span>
+          }
+        }
+        @case (loanStatuses.Active)
+        {
+          <span class="text-[#A4FFA7]">Наступна оплата до {{ loan.nextPaymentDate | date: 'dd.MM.yyyy' }}</span>
+        }
+        @case (loanStatuses.Completed)
+        {
+          <span class="text-[#A4FFA7]">Завершено</span>
+        }
+      }
+    </p>
+
+    <p class="m-0 text-[#CCCCCC] text-[24px]"> Виплачено: {{ loan.completedValue | currency:'UAH':'symbol':'1.2-2':'uk-UA' }} </p>
+    <p class="m-0 text-[#CCCCCC] text-[24px]"> Залишилось: {{ loan.leftValue | currency:'UAH':'symbol':'1.2-2':'uk-UA' }} </p>
+
+    <div *ngIf="role === roles.User" class="flex" [ngClass]="loan.status === loanStatuses.NeedPayment ? 'justify-between' : 'justify-center'">
+      @if (loan.status === loanStatuses.NeedPayment) {
+        <div>
+          <p class="text-[24px] m-0">Потрібно оплатити {{ loan.valueToPayOnCurrentMonth  | currency:'UAH':'symbol':'1.2-2':'uk-UA'  }} до {{ loan.nextPaymentDate | date: 'dd.MM.yyyy' }}</p>
+          <p class="text-[24px] m-0">у разі прострочки <span class="text-[#FF7777]">буде нарахована пеня {{ loan.valueToPay * 0.01 | currency:'UAH':'symbol':'1.2-2':'uk-UA'  }}</span></p>
+        </div>
+        <button class="!text-[24px] w-[250px] h-[65px]" mat-fab extended (click)="payMoney()">Оплатити</button>
+      } @else if (loan.status === loanStatuses.GetMoney) {
+        <button class="!text-[24px] w-[250px] h-[65px]" mat-fab extended (click)="getMoney()">Отримати кошти</button>
+      } @else if (loan.status !== loanStatuses.Completed) {
+        <button class="!text-[24px] w-[250px] h-[65px]" mat-fab extended (click)="payMoney()">Оплатити наперед</button>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+
+
+<main class="mt-[40px]">
+  <section class="flex justify-center p-[50px] items-center">
+    <div>
+      <h1 class="text-[64px] m-0 max-w-[450px]">Займи онлайн на картку</h1>
+      <p class="text-[24px]">До 20000 гривень на перший займ</p>
+      <button class="!text-[36px] !w-[320px] !h-[80px]" mat-fab extended (click)="scrollToElement()">Оформити займ</button>
+    </div>
+    <div>
+      <img class="w-full max-h-[532px]"src="assets/images/mainImage.png" alt="Main">
+    </div>
+  </section>
+
+  <section class="mx-auto flex justify-center items-center flex-col gap-[30px] max-w-[1200px]">
+    <h2 class="m-0 text-[64px] font-medium">Наші переваги</h2>
+    <mat-tab-group class="w-full bg-[#003D3D] rounded-[20px] pb-[10px]">
+      <mat-tab class="main-tab " label="Новим клієнтам">
+        <div class="flex mt-[20px] flex-wrap gap-[30px]">
+            <div class="flex justify-start items-center gap-[10px] max-w-[570px]">
+              <img class="pl-[10px]" src="assets/images/newClient1.png" alt="New client 1">
+              <p class="m-0 text-[18px]">Видаємо перший кредит онлайн на суму до 20 000 грн зі зниженою процентною ставкою 0,01% на день на перший обраний період </p>
+            </div>
+            <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+              <img class="pl-[10px]" src="assets/images/newClient2.png" alt="New client 2">
+              <p class="m-0 text-[18px]">Оформляємо кредити онлайн 24/7. Розглядаємо 100% заявок, зокрема анкети клієнтів з проблемною кредитною історією</p>
+            </div>
+            <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+              <img class="pl-[10px]" src="assets/images/newClient3.png" alt="New client 3">
+              <p class="m-0 text-[18px]">Запитуємо дані паспорта, ІПН, номер платіжної картки й телефону</p>
+            </div>
+            <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+              <img class="pl-[10px]" src="assets/images/newClient4.png" alt="New client 4">
+              <p class="m-0 text-[18px]">Переказуємо гроші на платіжну картку відразу після підписання електронного договору про надання кредиту</p>
+            </div>
+        </div>
+      </mat-tab>
+      <mat-tab class="main-tab" label="Постійним клієнтам">
+        <div class="flex mt-[20px] flex-wrap gap-[30px]">
+          <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+            <img class="pl-[10px]" src="assets/images/client1.png" alt="New client 1">
+            <p class="m-0 text-[18px]">Підвищуємо суму до 40 000 грн за стандартної процентної ставки 1% на день. Даруємо промокоди та знижки до -99% на майбутні кредити згідно з програмою лояльності</p>
+          </div>
+          <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+            <img class="pl-[10px]" src="assets/images/client2.png" alt="New client 2">
+            <p class="m-0 text-[18px]">Закріплюємо за вами особистий кабінет — ви зможете переглядати історію кредитів, швидше оформляти їх і дізнаватися про персональні знижки</p>
+          </div>
+          <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+            <img class="pl-[10px]" src="assets/images/client3.png" alt="New client 3">
+            <p class="m-0 text-[18px]">Зберігаємо дані в системі — вам не доведеться вводити їх знову</p>
+          </div>
+          <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
+            <img class="pl-[10px]" src="assets/images/client4.png" alt="New client 4">
+            <p class="m-0 text-[18px]">Розглядаємо повторні запити в першу чергу — анкету автоматично аналізує система</p>
+          </div>
+      </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+
+
+  <section class="mx-auto flex justify-center mt-[50px] mb-[200px] items-center flex-col gap-[30px] max-w-[1200px]">
+    <h2 #scrollTarget class="m-0 text-[64px] font-medium">Оформити займ</h2>
+    <div class="bg-[#003D3D] rounded-[20px] w-full flex flex-col items-center gap-[30px] py-[20px]">
+      <div class="flex flex-row justify-center items-center w-full">
+        <form [formGroup]="loanForm" class="flex flex-col w-[50%] items-center">
+          <div class="flex flex-col w-full items-center pt-5">
+            <mat-form-field class="w-[75%]">
+              <mat-label class="!text-[20px]">Cума</mat-label>
+              <input type="number" formControlName="value" class="!text-[20px]" matInput>
+              <mat-error *ngIf="loanForm.get('value')?.hasError('required') && loanForm.get('value')?.touched">
+                Обов'язкове поле
+              </mat-error>
+              <mat-error *ngIf="loanForm.get('value')?.hasError('max') && loanForm.get('value')?.touched">
+                Не можна зайняти більше ніж {{20000 | currency:'UAH':'symbol':'1.2-2':'uk-UA'}}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-[75%]">
+              <mat-label class="!text-[20px]">Термін</mat-label>
+              <mat-select formControlName="term" class="!text-[20px]" placeholder="Оберіть термін">
+                  @for (option of loanTerms; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                  }
+              </mat-select>
+              <mat-error *ngIf="loanForm.get('term')?.hasError('required') && loanForm.get('term')?.touched">
+                Оберіть термін
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </form>
+        <div class="w-[50%] h-[186px] flex flex-col justify-between">
+          <p class="m-0 text-[32px]">Кількість платежів: {{ getCount() }}</p>
+          <p class="m-0 text-[32px]">Розмір платежу: {{ getPaymentSize() | currency:'UAH':'symbol':'1.2-2':'uk-UA'}}</p>
+          <p class="m-0 text-[32px]">Відсоток: {{ getPercent() }}%</p>
+        </div>
+      </div>
+      <button class="!text-[36px] !w-[320px] !h-[80px]" (click)="createApplication()" mat-fab extended>Оформити</button>
+    </div>
+  </section>
+</main>

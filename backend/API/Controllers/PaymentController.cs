@@ -30,8 +30,17 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("user/{userId:guid}")]
+        public async Task<IActionResult> GetPaymentsByUserId(Guid userId, [FromQuery] PaginationParameters parameters)
+        {
+            var result = await _repository.GetPaymentsByUserIdAsync(userId, parameters);
+            return Ok(result);
+        }
+
+
         [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] PaymentDTO paymentDto)
+        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO paymentDto)
         {
             var payment = await _repository.CreatePaymentAsync(paymentDto);
             return CreatedAtAction(nameof(GetPayment), new { id = payment.Id }, payment);

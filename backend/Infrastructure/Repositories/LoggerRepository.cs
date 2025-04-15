@@ -11,29 +11,34 @@ namespace backend.Infrastructure.Repositories
 {
     public class LoggerRepository : ILoggerRepository
     {
-        private readonly AppDbContext _context;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly AppDbContext _context;
 
-        public LoggerRepository(AppDbContext context)
+    public LoggerRepository(IServiceScopeFactory scopeFactory, AppDbContext context)
+    {
+        _scopeFactory = scopeFactory;
+        _context = context;
+    }
+
+    public async Task<UserActionLog> SaveLogAsync(UserActionDTO logDTO)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var log = new UserActionLog
         {
-            _context = context;
-        }
+            Id = Guid.NewGuid(),
+            UserId = logDTO.UserId,
+            Operation = logDTO.Operation,
+            Details = logDTO.Details,
+            Timestamp = DateTime.UtcNow
+        };
 
-        public async Task<UserActionLog> SaveLogAsync(UserActionDTO logDTO)
-        {
-            var log = new UserActionLog
-            {
-                Id = Guid.NewGuid(),
-                UserId = logDTO.UserId,
-                Operation = logDTO.Operation,
-                Details = logDTO.Details,
-                Timestamp = DateTime.UtcNow
-            };
+        context.UserActionLogs.Add(log);
+        await context.SaveChangesAsync();
 
-            _context.UserActionLogs.Add(log);
-            await _context.SaveChangesAsync();
-
-            return log;
-        }
+        return log;
+    }
 
         public async Task<UserActionDTO[]> GetLogsByUserIdAsync(Guid userId)
         {

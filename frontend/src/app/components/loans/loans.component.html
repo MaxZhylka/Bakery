@@ -1,0 +1,16 @@
+<h2 class="text-center mt-10 mb-0 text-[56px]">Список займів</h2>
+<div class="m-5 p-5 flex border flex-col justify-center mat-elevation-z8">
+  @if (user) {
+    <div class="flex flex-col items-center">
+      @for (loan of dataSource; track loan.id ) {
+        <app-loan-item [loan]="loan" [role]="user.role"></app-loan-item>
+      }
+      <mat-paginator
+        [length]="totalSize"
+        [pageSize]="paginationParams.size"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  }
+</div>

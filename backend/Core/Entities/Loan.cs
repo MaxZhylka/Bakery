@@ -15,8 +15,12 @@ namespace backend.Core.Entities
     public decimal ValueToPayOnCurrentMonth { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal ValueToPay { get; set; }
+    public DateTime NextPaymentDate { get; set; }
+    public required decimal CompletedValue { get; set; }
+    public required decimal LeftValue { get; set; }
     public LoanStatus Status { get; set; }
 
+    public LoanTerm Term { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;

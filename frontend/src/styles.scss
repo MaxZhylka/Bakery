@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Pangolin'; 
+  src: url('/assets/fonts/Pangolin-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 html,
 body {
   height: 100%;
@@ -22,4 +30,10 @@ body {
       container-text-color: var(--mdc-text-button-label-text-color, var(--mat-sys-primary))
     )
   );
+}
+
+:root {
+  @include mat.tooltip-overrides((
+    supporting-text-size: 24px
+  ));
 }

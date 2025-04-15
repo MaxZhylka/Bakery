@@ -43,7 +43,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.user$ = this.store.select(UserState.currentUser);
-    this.user$.pipe(filter((user)=>Boolean(user)), takeUntil(this.destroy$)).subscribe((user)=>this.userData = user);
+    this.user$.pipe(takeUntil(this.destroy$)).subscribe((user)=>this.userData = user);
   }
 
   public displayHeader(): boolean {

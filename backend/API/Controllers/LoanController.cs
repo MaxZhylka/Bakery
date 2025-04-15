@@ -30,6 +30,22 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("user/{userId:guid}")]
+        public async Task<IActionResult> GetLoansByUserId(Guid userId, [FromQuery] PaginationParameters parameters)
+        {
+            var result = await _repository.GetLoansByUserIdAsync(userId, parameters);
+            return Ok(result);
+        }
+
+        [HttpPost("{id:guid}")]
+
+        public async Task<IActionResult> GetMoneyByLoanId(Guid id)
+        {
+            await _repository.GetMoneyByLoanIdAsync(id);
+            return Ok();
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateLoan([FromBody] LoanDTO loanDto)
         {

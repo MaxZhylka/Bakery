@@ -1,0 +1,49 @@
+<div class="bg-[#003F3F] text-[24px] text-[#F0F0F0] flex flex-row justify-evenly items-center w-[1270px] py-10 rounded-[20px]">
+  <p>
+    Дата оформлення
+    <br/>
+    {{ loanApplication.createdAt | date: 'dd.MM.yyyy' }}
+  </p>
+  <p>
+    Розмір займу
+    <br/>
+    {{ loanApplication.value| currency:'UAH':'symbol':'1.2-2':'uk-UA' }}
+  </p>
+  <p>
+    Термін займу
+    <br/>
+    {{ loanApplicationTerm[loanApplication.term]}}
+  </p>
+  @if (role === roles.Admin) {
+    <p>
+      Пошта клієнта
+      <br/>
+      {{ loanApplication.clientEmail }}
+    </p>
+  }
+
+  <p>
+    @switch (loanApplication.status) {
+      @case (loanApplicationStatuses.Rejected) {
+        <span class="text-[24px] text-[#FF7777] flex items-center gap-2">Відхилено<mat-icon [matTooltip]="loanApplication.rejectionReason">info</mat-icon></span>
+      }
+      @case (loanApplicationStatuses.Approved) {
+        <span class="text-[24px] text-[#A4FFA7]">Схвалено</span>
+      }
+      @case (loanApplicationStatuses.Moderation) {
+        <span class="text-[24px] text-[#FFDB78]">В обробці</span>
+      }
+    }
+  </p>
+
+  @if (loanApplication.status === loanApplicationStatuses.Moderation && role === roles.Admin) {
+    <div class="flex gap-[31px]">
+      <button mat-fab (click)="approve()">
+        <mat-icon class="text-[48px] !size-[48px] text-[#A4FFA7]" matTooltip="Схвалити">done_outline</mat-icon>
+      </button>
+      <button mat-fab (click)="reject()">
+        <mat-icon class="text-[48px] !size-[48px] text-[#FF7777]" matTooltip="Відхилити">thumb_down</mat-icon>
+      </button>
+    </div>
+  }
+</div>

@@ -1,0 +1,17 @@
+<div mat-dialog-title class="text-center text-[28px]">Оплатити</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col items-center gap-6 p-6">
+
+  <mat-form-field class="w-[300px]">
+    <mat-label>Сума оплати</mat-label>
+    <input matInput formControlName="value">
+    <mat-error *ngIf="form.get('value')?.hasError('required')">Це поле обов'язкове</mat-error>
+    <mat-error *ngIf="form.get('value')?.hasError('max')">Сумма не може бути більша за весь борг</mat-error>
+  </mat-form-field>
+
+  <div class="flex justify-center gap-4 pt-4">
+    <button mat-button type="button" (click)="cancel()">Скасувати</button>
+    <button mat-flat-button color="primary" type="submit">Оплатити</button>
+  </div>
+
+</form>

@@ -1,4 +1,4 @@
-import { State, Action, StateContext, Selector } from '@ngxs/store';
+import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
 import { CheckAuth, Login, LoginFail, LoginSuccess, Logout, LogoutFail, LogoutSuccess, Register, RegisterFail, RegisterSuccess, SetLoading, SetUser } from './app.actions';
 import { AppStateModel, User, UserStateModel } from '../interfaces';
 import { Inject, Injectable } from '@angular/core';
@@ -6,6 +6,8 @@ import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBar } from '@angular/material/sn
 import { AuthService } from '../services/auth-service/auth.service';
 import { catchError, finalize, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { LoanApplicationState } from './loan-application.state';
+import { CreateLoanApplication } from './loan-application.actions';
 
 @Injectable()
 @State<AppStateModel>({
@@ -41,7 +43,8 @@ export class UserState {
         @Inject(MAT_SNACK_BAR_DEFAULT_OPTIONS) public data: any,
         private readonly snackBar: MatSnackBar,
         private readonly authService: AuthService,
-        private readonly router: Router
+        private readonly router: Router,
+        private readonly store: Store
     ) { }
 
     @Selector()
@@ -83,8 +86,17 @@ export class UserState {
     loginSuccess(ctx: StateContext<UserStateModel>, { user }: LoginSuccess) {
         ctx.patchState({ currentUser: user });
         ctx.dispatch(new SetLoading(false));
-        this.router.navigate(['']);
+
         this.snackBar.open('Login successful!', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
+        this.store.select(LoanApplicationState.getLoanAppDraft).subscribe((draft) => {
+            if (draft) {
+                this.router.navigate(['loan-applications']);
+                draft.userId = user.id;
+                this.store.dispatch(new CreateLoanApplication(draft, { size: 10, offset: 0 }));
+            } else {
+                this.router.navigate(['']);
+            }
+        });
     }
 
     @Action(LoginFail)
@@ -96,11 +108,20 @@ export class UserState {
     @Action(RegisterSuccess)
     registerSuccess(ctx: StateContext<UserStateModel>, action: RegisterSuccess) {
         ctx.dispatch(new SetLoading(false));
-        this.router.navigate(['']);
         ctx.patchState({
             currentUser: action.payload
         });
         this.snackBar.open('Registration successful!', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
+
+        this.store.select(LoanApplicationState.getLoanAppDraft).subscribe((draft) => {
+            if (draft) {
+                this.router.navigate(['loan-applications']);
+                draft.userId = action.payload.id;
+                this.store.dispatch(new CreateLoanApplication(draft, { size: 10, offset: 0 }));
+            } else {
+                this.router.navigate(['']);
+            }
+        });
     }
 
     @Action(RegisterFail)
@@ -141,6 +162,7 @@ export class UserState {
 
     @Action(LogoutSuccess)
     logoutSuccess(ctx: StateContext<UserStateModel>) {
+        ctx.dispatch(new SetUser(null));
         this.router.navigate(['/login']);
         this.snackBar.open('Ви успішно вийшли з аккаунту', 'Close', { panelClass: 'success-snackbar', duration: 3000 });
     }

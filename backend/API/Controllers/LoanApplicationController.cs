@@ -1,6 +1,7 @@
 using backend.Core.DTOs;
 using backend.Core.Models;
 using backend.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Api.Controllers
@@ -30,8 +31,16 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("user/{userId:guid}")]
+        public async Task<IActionResult> GetLoanApplicationsByUserId(Guid userId, [FromQuery] PaginationParameters parameters)
+        {
+            var result = await _repository.GetLoanApplicationsByUserIdAsync(userId, parameters);
+            return Ok(result);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreateLoanApplication([FromBody] LoanApplicationDTO applicationDto)
+        public async Task<IActionResult> CreateLoanApplication([FromBody] CreateLoanApplicationDTO applicationDto)
         {
             var application = await _repository.CreateLoanApplicationAsync(applicationDto);
             return CreatedAtAction(nameof(GetLoanApplication), new { id = application.Id }, application);
@@ -49,6 +58,24 @@ namespace backend.Api.Controllers
         {
             await _repository.DeleteLoanApplicationAsync(id);
             return NoContent();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        [Route("approve/{id:guid}")]
+        public async Task<IActionResult> ApproveLoanApplication(Guid id)
+        {
+            await _repository.ApproveLoanApplicationAsync(id);
+            return Ok(new { message = "Loan application approved successfully." });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        [Route("reject/{id:guid}")]
+        public async Task<IActionResult> RejectLoanApplication(Guid id, [FromBody] string reason)
+        {
+            await _repository.RejectLoanApplicationAsync(id, reason);
+            return Ok(new { message = "Loan application rejected successfully." });
         }
     }
 }

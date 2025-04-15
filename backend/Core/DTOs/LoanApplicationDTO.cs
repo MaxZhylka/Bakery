@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using backend.Core.Enums;
 
 namespace backend.Core.DTOs
@@ -9,9 +10,14 @@ namespace backend.Core.DTOs
 
         public int Value { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public LoanApplicationStatus Status { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public LoanTerm Term { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? RejectionReason { get; set; }
+
+        public required string ClientEmail { get; set; }
     }
 }

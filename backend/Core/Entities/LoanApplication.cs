@@ -1,3 +1,4 @@
+
 using backend.Core.Enums;
 
 namespace backend.Core.Entities
@@ -10,9 +11,11 @@ namespace backend.Core.Entities
     public int Value { get; set; }
 
     public LoanApplicationStatus Status { get; set; }
-
     public LoanTerm Term { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public User User { get; set; } = null!;
+    public string? RejectionReason { get; set; }
   }
 
 }

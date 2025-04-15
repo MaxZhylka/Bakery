@@ -47,7 +47,7 @@ export class CheckAuth {
 
 export class SetUser {
     static readonly type = '[Auth] Set User';
-    constructor(public payload: User) {}
+    constructor(public payload: User | null) {}
 }
 
 export class Logout {

@@ -1,16 +1,16 @@
+using System.Text;
 using backend.Core.Interfaces;
+using backend.Core.Middlewares;
 using backend.Core.Services;
 using backend.Infrastructure.Database;
 using backend.Infrastructure.Interfaces;
 using backend.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using backend.Core.Middlewares;
-using QuestPDF.Infrastructure;
-using QuestPDF.Drawing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
+using QuestPDF.Drawing;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -82,7 +82,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.EnsureCreated();
+    await DataSeeder.SeedAdminUserAsync(dbContext);
 }
 
 if (app.Environment.IsDevelopment())
