@@ -1,0 +1,32 @@
+
+<div class="flex items-center flex-col gap-[30px]">
+  <h2 class="m-0 mt-[30px]">Резервне копіювання та відновлення</h2>
+  
+  <mat-card class="restore-backup space-y-2 flex flex-col items-center w-[800px] p-[50px] rounded-[20px]">
+    <mat-form-field class="w-full">
+      <mat-label for="backupFolderPath">Шлях для резервної копії</mat-label>
+      <input matInput id="backupFolderPath" type="text" [(ngModel)]="backupFolderPath"/>
+    </mat-form-field>
+
+    <div class="actions" class="w-full">
+      <button class="w-full" mat-raised-button class="w-full" color="primary" (click)="downloadBackup()">Завантажити резервну копію</button>
+    </div>
+  </mat-card>  
+
+  <mat-card class="restore-backup flex flex-col items-center space-y-2 gap-[20px] w-[800px] p-[50px] rounded-[20px]">
+    <button class="w-full" mat-raised-button color="primary" (click)="fileInput.click()">
+      📂 Обрати файл резервної копії
+    </button>
+    <input
+    #fileInput
+    type="file"
+    (change)="onFileSelected($event)"
+    hidden
+    />
+    <div class="text-[$primary] !text-[24px]">
+      {{ selectedFileName || 'Файл не обрано' }}
+    </div>
+
+    <button class="w-full" mat-raised-button color="primary" (click)="restoreBackup()">Завантажити базу даних з файлу</button>
+  </mat-card>
+</div>

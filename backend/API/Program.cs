@@ -38,6 +38,7 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanApplicationRepository, LoanApplicationRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IBackupRepository, BackupRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentityServer();
 builder.Services.AddScoped<IAuthService, AuthService>();

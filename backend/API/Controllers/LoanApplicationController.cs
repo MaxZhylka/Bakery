@@ -1,6 +1,5 @@
 using backend.Core.DTOs;
 using backend.Core.Models;
-using backend.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,8 +71,9 @@ namespace backend.Api.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin,Manager")]
         [Route("reject/{id:guid}")]
-        public async Task<IActionResult> RejectLoanApplication(Guid id, [FromBody] string reason)
+        public async Task<IActionResult> RejectLoanApplication(Guid id)
         {
+            string reason = "";
             await _repository.RejectLoanApplicationAsync(id, reason);
             return Ok(new { message = "Loan application rejected successfully." });
         }

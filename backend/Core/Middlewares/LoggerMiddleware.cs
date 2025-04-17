@@ -67,6 +67,24 @@ namespace backend.Core.Middlewares
         ("Products", "DeleteProduct") => Operations.DeleteProduct,
         ("Products", "UpdateProduct") => Operations.UpdateProduct,
 
+        ("Payment", "CreatePayment") => Operations.CreatePayment,
+        ("Payment", "DeletePayment") => Operations.DeletePayment,
+        ("Payment", "UpdatePayment") => Operations.UpdatePayment,
+
+        ("Loan", "CreateLoan") => Operations.CreateLoan,
+        ("Loan", "DeleteLoan") => Operations.DeleteLoan,
+        ("Loan", "UpdateLoan") => Operations.UpdateLoan,
+        ("Loan", "GetMoneyByLoanId") => Operations.GetMoneyByLoanId,
+
+        ("LoanApplication", "CreateLoanApplication") => Operations.CreateLoanApplication,
+        ("LoanApplication", "DeleteLoanApplication") => Operations.DeleteLoanApplication,
+        ("LoanApplication", "UpdateLoanApplication") => Operations.UpdateLoanApplication,
+        ("LoanApplication", "ApproveLoanApplication") => Operations.ApproveLoanApplication,
+        ("LoanApplication", "RejectLoanApplication") => Operations.RejectLoanApplication,
+
+        ("Backup", "CreateBackup") => Operations.CreateBackup,
+        ("Backup", "RestoreBackup") => Operations.RestoreBackup,
+
         ("Logger", "GetLogs") => Operations.GetAllLogs,
         ("Logger", "GetLogsByUserId") => Operations.GetLogsByUserID,
         ("Logger", "GetLogById") => Operations.GetLogById,

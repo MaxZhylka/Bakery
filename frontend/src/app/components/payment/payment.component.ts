@@ -3,7 +3,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
 import { first, Observable, Subject, takeUntil } from 'rxjs';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
@@ -28,7 +28,8 @@ import { PaymentState } from '../../store/payment.state';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    RouterModule
+    RouterModule,
+    CurrencyPipe
   ]
 })
 export class PaymentComponent implements OnInit, OnDestroy {

@@ -8,6 +8,7 @@ import { LoansComponent } from './components/loans/loans.component';
 import { LoanApplicationsComponent } from './components/loan-applications/loan-applications.component';
 import { PaymentComponent } from './components/payment/payment.component';
 import { HomePageComponent } from './components/home-page/home-page.component';
+import { BackupPageComponent } from './components/backup-page/backup-page.component';
 
 export const routes: Routes = [
   { path: 'login', component: RegistrationFormComponent },
@@ -21,5 +22,6 @@ export const routes: Routes = [
   { path: 'payments', component: PaymentComponent, canActivate: [() => authGuard()] },
   { path: 'users', component: UsersComponent, canActivate: [() => authGuard(['Admin', 'Manager'])] },
   { path: 'logs', component: LogsComponent, canActivate: [() => authGuard(['Admin'])] },
+  {path: 'backup', component: BackupPageComponent, canActivate: [() => authGuard(['Admin'])]},
   { path: '', component: HomePageComponent, pathMatch: 'full'}
 ];

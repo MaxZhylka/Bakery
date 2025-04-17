@@ -17,12 +17,14 @@ import { UsersState } from './store/users.state';
 import { PaymentState } from './store/payment.state';
 import { LoanState } from './store/loan.state';
 import { LoanApplicationState } from './store/loan-application.state';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
+    provideNativeDateAdapter(),
     importProvidersFrom(
       NgxsModule.forRoot([UserState, AppState, ProductsState, OrdersState, LogsState, UsersState, PaymentState, LoanState, LoanApplicationState]),
       NgxsReduxDevtoolsPluginModule.forRoot(),

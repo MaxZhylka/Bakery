@@ -61,6 +61,11 @@ export interface PaginationParams {
     offset: number;
 }
 
+export interface LogsPaginationParams extends PaginationParams {
+    operation?: string;
+    userRole?: string;
+}
+
 export interface ICreateOrder {
     productId: string;
     productCount: number;
@@ -277,3 +282,30 @@ export interface ILoanApplicationCreate {
     term: LoanTerm;
     userId?: string;
 }
+
+
+export const actionsList = [
+    "Login",
+    "Logout",
+    "Register",
+    "CreateLoanApplication",
+    "ApproveLoanApplication",
+    "RejectLoanApplication",
+    "UpdateLoanApplication",
+    "DeleteLoanApplication",
+    "CreateLoan",
+    "UpdateLoan",
+    "DeleteLoan",
+    "CreatePayment",
+    "UpdatePayment",
+    "DeletePayment",
+    "GetMoneyByLoanId",
+    "CreateBackup",
+    "RestoreBackup",
+]
+
+export const rolesList = [
+    "Admin",
+    "User",
+    "Manager",
+]

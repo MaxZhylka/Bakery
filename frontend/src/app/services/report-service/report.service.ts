@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -11,23 +11,36 @@ export class ReportService {
 
   constructor(private readonly http: HttpClient) {}
 
-  downloadProductReport(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/by-product`, { responseType: 'blob' });
-  }
-  downloadCustomerReport(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/by-customer`, { responseType: 'blob' });
-  }
-
-  downloadAllOrdersReport(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/all-orders`, { responseType: 'blob' });
+  downloadLoanApplicationsReport(from: Date, to: Date): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from.toISOString())
+      .set('to', to.toISOString());
+    return this.http.get(`${this.apiUrl}/loan-applications-month`, { params, responseType: 'blob' });
   }
 
-  downloadOrderTrendsByCustomer(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/trends-by-customer`, { responseType: 'blob' });
+  downloadMoneyFlowReport(from: Date, to: Date): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from.toISOString())
+      .set('to', to.toISOString());
+    return this.http.get(`${this.apiUrl}/money-flow`, { params, responseType: 'blob' });
   }
 
-  downloadOrderTrendsByProduct(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/trends-by-product`, { responseType: 'blob' });
+  downloadUserApplicationsReport(from: Date, to: Date): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from.toISOString())
+      .set('to', to.toISOString());
+    return this.http.get(`${this.apiUrl}/applications-per-user`, { params, responseType: 'blob' });
+  }
+
+  downloadMonthlyPaymentsReport(from: Date, to: Date): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from.toISOString())
+      .set('to', to.toISOString());
+    return this.http.get(`${this.apiUrl}/monthly-payments`, { params, responseType: 'blob' });
+  }
+
+  downloadCompletedLoansReport(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/completed-loans`, { responseType: 'blob' });
   }
 
   private downloadFile(blob: Blob, fileName: string): void {
@@ -37,23 +50,29 @@ export class ReportService {
     link.click();
   }
 
-  saveProductReport(): void {
-    this.downloadProductReport().subscribe((blob) => this.downloadFile(blob, 'product-report.pdf'));
+
+  saveLoanApplicationsReport(from: Date, to: Date): void {
+    this.downloadLoanApplicationsReport(from, to)
+      .subscribe(blob => this.downloadFile(blob, `LoanApplications_${from.toISOString().slice(0,10)}_${to.toISOString().slice(0,10)}.pdf`));
   }
 
-  saveCustomerReport(): void {
-    this.downloadCustomerReport().subscribe((blob) => this.downloadFile(blob, 'customer-report.pdf'));
+  saveMoneyFlowReport(from: Date, to: Date): void {
+    this.downloadMoneyFlowReport(from, to)
+      .subscribe(blob => this.downloadFile(blob, `MoneyFlow_${from.toISOString().slice(0,10)}_${to.toISOString().slice(0,10)}.pdf`));
   }
 
-  saveAllOrdersReport(): void {
-    this.downloadAllOrdersReport().subscribe((blob) => this.downloadFile(blob, 'all-orders-report.pdf'));
+  saveUserApplicationsReport(from: Date, to: Date): void {
+    this.downloadUserApplicationsReport(from, to)
+      .subscribe(blob => this.downloadFile(blob, `UserApplications_${from.toISOString().slice(0,10)}_${to.toISOString().slice(0,10)}.pdf`));
   }
 
-  saveOrderTrendsByCustomer(): void {
-    this.downloadOrderTrendsByCustomer().subscribe((blob) => this.downloadFile(blob, 'order-trends-by-customer.pdf'));
+  saveMonthlyPaymentsReport(from: Date, to: Date): void {
+    this.downloadMonthlyPaymentsReport(from, to)
+      .subscribe(blob => this.downloadFile(blob, `MonthlyPayments_${from.toISOString().slice(0,10)}_${to.toISOString().slice(0,10)}.pdf`));
   }
 
-  saveOrderTrendsByProduct(): void {
-    this.downloadOrderTrendsByProduct().subscribe((blob) => this.downloadFile(blob, 'order-trends-by-product.pdf'));
+  saveCompletedLoansReport(): void {
+    this.downloadCompletedLoansReport()
+      .subscribe(blob => this.downloadFile(blob, `CompletedLoansReport.pdf`));
   }
 }

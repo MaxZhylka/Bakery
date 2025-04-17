@@ -9,7 +9,7 @@ namespace backend.Core.Services
   {
     private readonly ILoggerRepository _loggerRepository = loggerRepository;
 
-    public async Task<PaginatedResult<UserActionDTO>> GetAllLogs(PaginationParameters parameters)
+    public async Task<PaginatedResult<UserActionDTO>> GetAllLogs(LoggerPaginationParameters parameters)
     {
       return await _loggerRepository.GetAllLogsAsync(parameters);
     }

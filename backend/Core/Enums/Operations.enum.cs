@@ -42,5 +42,10 @@ namespace backend.Core.Enums
     CreatePayment,
     GetPayment,
     GetMoneyByLoanId,
+    
+    ApproveLoanApplication,
+    RejectLoanApplication,
+    CreateBackup,
+    RestoreBackup,
   }
 }

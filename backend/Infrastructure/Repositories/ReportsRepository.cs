@@ -1,224 +1,86 @@
-using System.Data;
 using backend.Core.DTOs;
+using backend.Core.Entities;
+using backend.Core.Enums;
+using backend.Infrastructure.Database;
 using backend.Infrastructure.Interfaces;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
-namespace backend.Infrastructure.Repositories
+namespace backend.Infrastructure.Repositories;
+
+public class ReportRepository : IReportRepository
 {
-	public class ReportRepository(IDBConnectionFactory connectionFactory) : IReportRepository
-	{
-		private readonly IDBConnectionFactory _connectionFactory = connectionFactory;
+    private readonly AppDbContext _context;
 
-		public async Task<IEnumerable<ProductReportDto>> GetReportByProductAsync()
-		{
-			try
-			{
-				using var connection = _connectionFactory.CreateConnection();
-				if (connection.State != ConnectionState.Open)
-					await connection.OpenAsync();
+    public ReportRepository(AppDbContext context)
+    {
+        _context = context;
+    }
 
-				const string query = @"
-                    SELECT 
-                        p.Id AS ProductId,
-                        p.Name AS ProductName,
-                        SUM(o.ProductCount) AS TotalSold,
-                        SUM(o.Price) AS TotalRevenue
-                    FROM Orders o
-                    JOIN Products p ON o.ProductId = p.Id
-                    GROUP BY p.Id, p.Name
-                    ORDER BY TotalSold DESC";
+    public async Task<List<LoanApplicationReportDto>> GetApplicationsByMonthAsync(DateTime from, DateTime to)
+    {
+        return await _context.LoanApplications
+            .Where(app => app.CreatedAt >= from && app.CreatedAt <= to)
+            .GroupBy(app => new { app.CreatedAt.Year, app.CreatedAt.Month })
+            .Select(g => new LoanApplicationReportDto
+            {
+                Year = g.Key.Year,
+                Month = g.Key.Month,
+                Total = g.Count(),
+                Rejected = g.Count(x => x.Status == LoanApplicationStatus.Rejected),
+                RejectedPercent = (double)g.Count(x => x.Status == LoanApplicationStatus.Rejected) / g.Count() * 100
+            })
+            .ToListAsync();
+    }
 
-				using var command = new SqlCommand(query, connection);
-				var results = new List<ProductReportDto>();
+    public async Task<MoneyFlowDto> GetMoneyFlowAsync(DateTime from, DateTime to)
+    {
+        var issued = await _context.Loans
+            .Where(l => l.CreatedAt >= from && l.CreatedAt <= to)
+            .SumAsync(l => l.ValueToPay);
 
-				using var reader = await command.ExecuteReaderAsync();
-				while (await reader.ReadAsync())
-				{
-					results.Add(new ProductReportDto
-					{
-						ProductId = reader.GetGuid(0),
-						ProductName = reader.GetString(1),
-						TotalSold = reader.GetInt32(2),
-						TotalRevenue = reader.GetDecimal(3)
-					});
-				}
+        var returned = await _context.Payments
+            .Where(p => p.CreatedAt >= from && p.CreatedAt <= to)
+            .SumAsync(p => p.Value);
 
-				return results;
-			}
-			catch (SqlException e)
-			{
-				throw new Exception($"Database error while getting product report: {e.Message}", e);
-			}
-		}
+        return new MoneyFlowDto
+        {
+            TotalIssued = issued,
+            TotalReturned = returned
+        };
+    }
 
-		public async Task<IEnumerable<CustomerReportDto>> GetReportByCustomerAsync()
-		{
-			try
-			{
-				using var connection = _connectionFactory.CreateConnection();
-				if (connection.State != ConnectionState.Open)
-					await connection.OpenAsync();
+    public async Task<List<UserApplicationsDto>> GetApplicationsPerUserAsync(DateTime from, DateTime to)
+    {
+        return await _context.LoanApplications
+            .Where(a => a.CreatedAt >= from && a.CreatedAt <= to)
+            .GroupBy(a => new { a.User.Email })
+            .Select(g => new UserApplicationsDto
+            {
+                Email = g.Key.Email,
+                ApplicationsCount = g.Count()
+            })
+            .ToListAsync();
+    }
 
-				const string query = @"
-                    SELECT 
-                        u.Id AS CustomerId,
-                        u.Name AS CustomerName,
-                        COUNT(o.Id) AS TotalOrders,
-                        SUM(o.Price) AS TotalSpent
-                    FROM Users u
-                    JOIN Orders o ON u.Id = o.CustomerId
-                    GROUP BY u.Id, u.Name
-                    ORDER BY TotalSpent DESC";
+    public async Task<List<MonthlyPaymentsDto>> GetMonthlyPaymentsAsync(DateTime from, DateTime to)
+    {
+        return await _context.Payments
+            .Where(p => p.CreatedAt >= from && p.CreatedAt <= to)
+            .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
+            .Select(g => new MonthlyPaymentsDto
+            {
+                Year = g.Key.Year,
+                Month = g.Key.Month,
+                PaymentsCount = g.Count(),
+                AverageAmount = g.Average(x => x.Value)
+            })
+            .ToListAsync();
+    }
 
-				using var command = new SqlCommand(query, connection);
-				var results = new List<CustomerReportDto>();
-
-				using var reader = await command.ExecuteReaderAsync();
-				while (await reader.ReadAsync())
-				{
-					results.Add(new CustomerReportDto
-					{
-						CustomerId = reader.GetGuid(0),
-						CustomerName = reader.GetString(1),
-						TotalOrders = reader.GetInt32(2),
-						TotalSpent = reader.GetDecimal(3)
-					});
-				}
-
-				return results;
-			}
-			catch (SqlException e)
-			{
-				throw new Exception($"Database error while getting customer report: {e.Message}", e);
-			}
-		}
-
-		public async Task<IEnumerable<OrderReportDto>> GetAllOrdersReportAsync()
-		{
-			try
-			{
-				using var connection = _connectionFactory.CreateConnection();
-				if (connection.State != ConnectionState.Open)
-					await connection.OpenAsync();
-
-				const string query = @"
-                    SELECT 
-                        o.Id AS OrderId,
-                        u.Name AS CustomerName,
-                        p.Name AS ProductName,
-                        o.ProductCount,
-                        o.Price,
-                        o.CreatedAt
-                    FROM Orders o
-                    JOIN Users u ON o.CustomerId = u.Id
-                    JOIN Products p ON o.ProductId = p.Id
-                    ORDER BY o.CreatedAt DESC";
-
-				using var command = new SqlCommand(query, connection);
-				var results = new List<OrderReportDto>();
-
-				using var reader = await command.ExecuteReaderAsync();
-				while (await reader.ReadAsync())
-				{
-					results.Add(new OrderReportDto
-					{
-						OrderId = reader.GetGuid(0),
-						CustomerName = reader.GetString(1),
-						ProductName = reader.GetString(2),
-						ProductCount = reader.GetInt32(3),
-						Price = reader.GetDecimal(4),
-						CreatedAt = reader.GetDateTime(5)
-					});
-				}
-
-				return results;
-			}
-			catch (SqlException e)
-			{
-				throw new Exception($"Database error while getting all orders report: {e.Message}", e);
-			}
-		}
-
-		public async Task<IEnumerable<OrderTrendsByCustomerDto>> GetOrderTrendsByCustomerAsync()
-		{
-			try
-			{
-				using var connection = _connectionFactory.CreateConnection();
-				if (connection.State != ConnectionState.Open)
-					await connection.OpenAsync();
-
-				const string query = @"
-                  SELECT 
-											u.Name AS CustomerName,
-											FORMAT(o.CreatedAt, 'yyyy-MM-dd') AS OrderDate,
-											COUNT(o.Id) AS TotalOrders
-									FROM Orders o
-									JOIN Users u ON o.CustomerId = u.Id
-									WHERE o.CreatedAt >= DATEADD(DAY, -30, GETDATE())
-									GROUP BY u.Name, FORMAT(o.CreatedAt, 'yyyy-MM-dd')
-									ORDER BY OrderDate DESC";
-
-				using var command = new SqlCommand(query, connection);
-				var results = new List<OrderTrendsByCustomerDto>();
-
-				using var reader = await command.ExecuteReaderAsync();
-				while (await reader.ReadAsync())
-				{
-					results.Add(new OrderTrendsByCustomerDto
-					{
-						CustomerName = reader.GetString(0),
-						OrderMonth = reader.GetString(1),
-						TotalOrders = reader.GetInt32(2)
-					});
-				}
-
-				return results;
-			}
-			catch (SqlException e)
-			{
-				throw new Exception($"Database error while getting order trends by customer: {e.Message}", e);
-			}
-		}
-
-		public async Task<IEnumerable<OrderTrendsByProductDto>> GetOrderTrendsByProductAsync()
-		{
-			try
-			{
-				using var connection = _connectionFactory.CreateConnection();
-				if (connection.State != ConnectionState.Open)
-					await connection.OpenAsync();
-
-				const string query = @"
-                    SELECT 
-												p.Name AS ProductName,
-												FORMAT(o.CreatedAt, 'yyyy-MM-dd') AS OrderDate,
-												SUM(o.ProductCount) AS TotalSold
-										FROM Orders o
-										JOIN Products p ON o.ProductId = p.Id
-										WHERE o.CreatedAt >= DATEADD(DAY, -30, GETDATE())
-										GROUP BY p.Name, FORMAT(o.CreatedAt, 'yyyy-MM-dd')
-										ORDER BY OrderDate DESC";
-
-				using var command = new SqlCommand(query, connection);
-				var results = new List<OrderTrendsByProductDto>();
-
-				using var reader = await command.ExecuteReaderAsync();
-				while (await reader.ReadAsync())
-				{
-					results.Add(new OrderTrendsByProductDto
-					{
-						ProductName = reader.GetString(0),
-						OrderMonth = reader.GetString(1),
-						TotalSold = reader.GetInt32(2)
-					});
-				}
-
-				return results;
-			}
-			catch (SqlException e)
-			{
-				throw new Exception($"Database error while getting order trends by product: {e.Message}", e);
-			}
-		}
-	}
+    public async Task<List<Loan>> GetCompletedLoansAsync()
+    {
+        return await _context.Loans
+            .Where(l => l.Status == LoanStatus.Completed)
+            .ToListAsync();
+    }
 }

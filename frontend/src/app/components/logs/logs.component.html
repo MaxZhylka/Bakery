@@ -1,4 +1,26 @@
 <h2 class="text-center mt-10">Список дій</h2>
+<div [formGroup]="form" class="flex justify-end gap-[30px] pr-[100px]">
+  <mat-form-field>
+    <mat-label>Оберіть дію для фільтрації</mat-label>
+    <mat-select formControlName="action" canSelectNullableOptions>
+      <mat-option value="">Без фільтру</mat-option>
+      @for(action of userActions; track action) {
+        <mat-option [value]="action">{{ action }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Оберіть роль для фільтрації</mat-label>
+    <mat-select formControlName="role" canSelectNullableOptions>
+      <mat-option value="">Без фільтру</mat-option>
+      @for(role of userRoles; track role) {
+        <mat-option  [value]="role">{{ role }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
 <div class="m-5 p-5 flex border flex-col justify-center mat-elevation-z8">
   <table mat-table [dataSource]="dataSource">
 

@@ -13,6 +13,7 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { UserState } from '../../store/app.state';
 import { CreateApplicationDraft, CreateLoanApplication } from '../../store/loan-application.actions';
+import { CheckAuth } from '../../store/app.actions';
 
 
 @Component({
@@ -47,6 +48,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    this.store.dispatch(new CheckAuth());
     this.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       this.user = user;
     });

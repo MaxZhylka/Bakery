@@ -11,7 +11,7 @@ namespace backend.Core.Interfaces {
 
     Task<UserActionDTO[]> GetLogsByUserId(Guid userId);
 
-    Task<PaginatedResult<UserActionDTO>> GetAllLogs(PaginationParameters parameters);
+    Task<PaginatedResult<UserActionDTO>> GetAllLogs(LoggerPaginationParameters parameters);
 
     Task<UserActionDTO> GetLogById(Guid logId);
 

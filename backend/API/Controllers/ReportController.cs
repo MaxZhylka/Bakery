@@ -1,44 +1,52 @@
-using backend.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using backend.Core.Interfaces;
 
-[ApiController]
-[Route("api/reports")]
-public class ReportController(IReportService reportService) : ControllerBase
+namespace backend.Api.Controllers
 {
-    private readonly IReportService _reportService = reportService;
-
-    [HttpGet("by-product")]
-    public async Task<IActionResult> GetReportByProduct()
+    [ApiController]
+    [Route("api/reports")]
+    public class ReportController : ControllerBase
     {
-        var reportBytes = await _reportService.GenerateProductReportAsync();
-        return File(reportBytes, "application/pdf", "ProductReport.pdf");
-    }
+        private readonly IReportService _reportService;
+        
+        public ReportController(IReportService reportService)
+        {
+            _reportService = reportService;
+        }
 
-    [HttpGet("by-customer")]
-    public async Task<IActionResult> GetReportByCustomer()
-    {
-        var reportBytes = await _reportService.GenerateCustomerReportAsync();
-        return File(reportBytes, "application/pdf", "CustomerReport.pdf");
-    }
+        [HttpGet("loan-applications-month")]
+        public async Task<IActionResult> GetLoanApplicationsByMonth([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var reportBytes = await _reportService.GenerateLoanApplicationsByMonthPdfAsync(from, to);
+            return File(reportBytes, "application/pdf", $"LoanApplications_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
+        }
 
-    [HttpGet("all-orders")]
-    public async Task<IActionResult> GetAllOrdersReport()
-    {
-        var reportBytes = await _reportService.GenerateAllOrdersReportAsync();
-        return File(reportBytes, "application/pdf", "AllOrdersReport.pdf");
-    }
+        [HttpGet("money-flow")]
+        public async Task<IActionResult> GetMoneyFlowReport([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var reportBytes = await _reportService.GenerateMoneyFlowReportPdfAsync(from, to);
+            return File(reportBytes, "application/pdf", $"MoneyFlow_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
+        }
 
-    [HttpGet("trends-by-customer")]
-    public async Task<IActionResult> GetOrderTrendsByCustomer()
-    {
-        var reportBytes = await _reportService.GenerateOrderTrendsByCustomerReportAsync();
-        return File(reportBytes, "application/pdf", "OrderTrendsByCustomer.pdf");
-    }
+        [HttpGet("applications-per-user")]
+        public async Task<IActionResult> GetUserApplicationsReport([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var reportBytes = await _reportService.GenerateUserApplicationsReportPdfAsync(from, to);
+            return File(reportBytes, "application/pdf", $"ApplicationsPerUser_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
+        }
 
-    [HttpGet("trends-by-product")]
-    public async Task<IActionResult> GetOrderTrendsByProduct()
-    {
-        var reportBytes = await _reportService.GenerateOrderTrendsByProductReportAsync();
-        return File(reportBytes, "application/pdf", "OrderTrendsByProduct.pdf");
+        [HttpGet("monthly-payments")]
+        public async Task<IActionResult> GetMonthlyPaymentsReport([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var reportBytes = await _reportService.GenerateMonthlyPaymentsReportPdfAsync(from, to);
+            return File(reportBytes, "application/pdf", $"MonthlyPayments_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
+        }
+
+        [HttpGet("completed-loans")]
+        public async Task<IActionResult> GetCompletedLoansReport()
+        {
+            var reportBytes = await _reportService.GenerateCompletedLoansReportPdfAsync();
+            return File(reportBytes, "application/pdf", "CompletedLoansReport.pdf");
+        }
     }
 }

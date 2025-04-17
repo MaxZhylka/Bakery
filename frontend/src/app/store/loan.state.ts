@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, first, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import {
@@ -15,7 +15,8 @@ import {
 import { SetLoading } from './app.actions';
 import { DataByPagination, Loan, Roles } from '../interfaces';
 import { LoanService } from '../services/loan-service/loan.service';
-import { GetMoney, GetLoanApplications } from './loan-application.actions';
+import { GetMoney, GetLoanApplications, GetLoanApplicationsByUserId } from './loan-application.actions';
+import { UserState } from './app.state';
 
 export interface LoanStateModel {
   loans: DataByPagination<Loan[]>;
@@ -35,7 +36,7 @@ export class LoanState {
     private readonly loanService: LoanService,
     private readonly snackBar: MatSnackBar,
     private readonly store: Store
-  ) {}
+  ) { }
 
   @Selector()
   static loans(state: LoanStateModel): DataByPagination<Loan[]> {
@@ -166,7 +167,13 @@ export class LoanState {
       tap(() => {
         ctx.patchState({ error: null });
         this.snackBar.open('Гроші відправлені', 'Закрити', { duration: 3000 });
-        ctx.dispatch(new GetLoans({ size: 10, offset: 0 }));
+        this.store.select(UserState.currentUser).pipe(first()).subscribe((user) => {
+          if (user?.role == Roles.User) {
+            this.store.dispatch(new GetLoansByUserId({ size: 10, offset: 0 }, user.id));
+          } else {
+            this.store.dispatch(new GetLoans({ size: 10, offset: 0 }));
+          }
+        });
       }),
       catchError((error) => {
         ctx.patchState({ error });
