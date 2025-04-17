@@ -1,47 +1,53 @@
-<h2 class="text-center mt-5"> Кабінет користувача </h2>
+<h2 class="text-center mt-5">Кабінет користувача</h2>
 
 <div class="flex h-auto w-[80%] justify-center items-start flex-wrap gap-4 m-auto">
 
-
   <ng-container *ngIf="userData?.role === roles.Admin">
-    
+
     <mat-card class="flex min-w-[325px] flex-col items-center p-4">
       <mat-icon color="primary">bakery_dining</mat-icon>
       <p class="text-lg font-bold mt-2">Звіт - Заявки на займи</p>
-      
+
       <mat-form-field appearance="fill" class="w-[70%]">
         <mat-label>Період</mat-label>
         <mat-date-range-input [rangePicker]="pickerProd">
-          <input matStartDate placeholder="Від" [(ngModel)]="loanApplicationsReportRange.from">
-          <input matEndDate placeholder="До" [(ngModel)]="loanApplicationsReportRange.to">
+          <input matStartDate placeholder="Від" [(ngModel)]="loanApplicationsReportRange.from" #fromLoan="ngModel">
+          <input matEndDate placeholder="До" [(ngModel)]="loanApplicationsReportRange.to" #toLoan="ngModel">
         </mat-date-range-input>
+        <mat-error *ngIf="fromLoan.errors || toLoan.errors">
+          Неправильний формат дати!
+        </mat-error>
         <mat-datepicker-toggle matSuffix [for]="pickerProd"></mat-datepicker-toggle>
         <mat-date-range-picker startView="multi-year" #pickerProd></mat-date-range-picker>
       </mat-form-field>
 
       <button mat-raised-button color="primary" (click)="downloadLoanApplicationsReport()">Завантажити</button>
     </mat-card>
-    
+
     <mat-card class="flex min-w-[325px] flex-col items-center p-4">
       <mat-icon color="primary">person</mat-icon>
       <p class="text-lg font-bold mt-2">Звіт - Грошовий обіг</p>
-      
+
       <mat-form-field appearance="fill" class="w-[70%]">
         <mat-label>Період</mat-label>
         <mat-date-range-input [rangePicker]="pickerCust">
-          <input matStartDate placeholder="Від" [(ngModel)]="moneyFlowReportRange.from">
-          <input matEndDate placeholder="До" [(ngModel)]="moneyFlowReportRange.to">
+          <input matStartDate placeholder="Від" [(ngModel)]="moneyFlowReportRange.from" #fromMoney="ngModel">
+          <input matEndDate placeholder="До" [(ngModel)]="moneyFlowReportRange.to" #toMoney="ngModel">
         </mat-date-range-input>
+        <mat-error *ngIf="fromMoney.errors || toMoney.errors">
+          Неправильний формат дати!
+        </mat-error>
         <mat-datepicker-toggle matSuffix [for]="pickerCust"></mat-datepicker-toggle>
         <mat-date-range-picker startView="multi-year" #pickerCust></mat-date-range-picker>
       </mat-form-field>
 
       <button mat-raised-button color="primary" (click)="downloadMoneyFlowReport()">Завантажити</button>
     </mat-card>
-    <mat-card class="flex min-w-[325px]  h-[226px]  flex-col items-center justify-between p-4">
+
+    <mat-card class="flex min-w-[325px] h-[226px] flex-col items-center justify-between p-4">
       <div class="flex flex-col items-center">
         <mat-icon color="accent">show_chart</mat-icon>
-        <p class="text-lg font-bold mt-2"> Звіт - Завершині позики </p>
+        <p class="text-lg font-bold mt-2">Звіт - Завершині позики</p>
       </div>
       <button mat-raised-button color="accent" (click)="downloadCompletedLoansReport()">Завантажити</button>
     </mat-card>
@@ -49,30 +55,36 @@
     <mat-card class="flex min-w-[325px] flex-col items-center p-4">
       <mat-icon color="accent">receipt_long</mat-icon>
       <p class="text-lg font-bold mt-2">Звіт - платежі по місяцях</p>
-      
+
       <mat-form-field appearance="fill" class="w-[70%]">
         <mat-label>Період</mat-label>
         <mat-date-range-input [rangePicker]="pickerAll">
-          <input matStartDate placeholder="Від" [(ngModel)]="monthlyPaymentsReportRange.from">
-          <input matEndDate placeholder="До" [(ngModel)]="monthlyPaymentsReportRange.to">
+          <input matStartDate placeholder="Від" [(ngModel)]="monthlyPaymentsReportRange.from" #fromMonthly="ngModel">
+          <input matEndDate placeholder="До" [(ngModel)]="monthlyPaymentsReportRange.to" #toMonthly="ngModel">
         </mat-date-range-input>
+        <mat-error *ngIf="fromMonthly.errors || toMonthly.errors">
+          Неправильний формат дати!
+        </mat-error>
         <mat-datepicker-toggle matSuffix [for]="pickerAll"></mat-datepicker-toggle>
         <mat-date-range-picker startView="multi-year" #pickerAll></mat-date-range-picker>
       </mat-form-field>
 
       <button mat-raised-button color="accent" (click)="downloadMonthlyPaymentsReport()">Завантажити</button>
     </mat-card>
-    
+
     <mat-card class="flex min-w-[325px] flex-col items-center p-4">
       <mat-icon color="accent">trending_up</mat-icon>
       <p class="text-lg font-bold mt-2">Звіт - заявки за клієнтами</p>
-      
+
       <mat-form-field appearance="fill" class="w-[70%]">
         <mat-label>Період</mat-label>
         <mat-date-range-input [rangePicker]="pickerTrendCust">
-          <input matStartDate placeholder="Від" [(ngModel)]="userApplicationsReportRange.from">
-          <input matEndDate placeholder="До" [(ngModel)]="userApplicationsReportRange.to">
+          <input matStartDate placeholder="Від" [(ngModel)]="userApplicationsReportRange.from" #fromUser="ngModel">
+          <input matEndDate placeholder="До" [(ngModel)]="userApplicationsReportRange.to" #toUser="ngModel">
         </mat-date-range-input>
+        <mat-error *ngIf="fromUser.errors || toUser.errors">
+          Неправильний формат дати!
+        </mat-error>
         <mat-datepicker-toggle matSuffix [for]="pickerTrendCust"></mat-datepicker-toggle>
         <mat-date-range-picker startView="multi-year" #pickerTrendCust></mat-date-range-picker>
       </mat-form-field>
@@ -81,7 +93,7 @@
     </mat-card>
   </ng-container>
 
-  <mat-card class="flex min-w-[325px] h-[226px] flex-col justify-between  items-center p-4">
+  <mat-card class="flex min-w-[325px] h-[226px] flex-col justify-between items-center p-4">
     <div class="flex flex-col items-center">
       <mat-icon color="warn">logout</mat-icon>
       <p class="text-lg font-bold mt-2">Вийти з аккаунту</p>

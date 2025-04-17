@@ -42,7 +42,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   constructor(private readonly fb: FormBuilder, private readonly store: Store, private readonly router: Router) {
     this.loanForm = this.fb.group({
-      value: [null, [Validators.required, Validators.max(20000)]],
+      value: [null, [Validators.required, Validators.min(0), Validators.max(20000)]],
       term: [null, Validators.required],
     });
   }

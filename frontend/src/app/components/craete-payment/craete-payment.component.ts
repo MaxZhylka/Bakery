@@ -26,6 +26,7 @@ export class CreatePaymentComponent {
         '',
         [
           Validators.required,
+          Validators.min(0),
           Validators.max(data.maxValue),
         ]
       ]

@@ -27,7 +27,7 @@ namespace backend.Core.DTOs
     public int Year { get; set; }
     public int Month { get; set; }
     public int PaymentsCount { get; set; }
-    public double AverageAmount { get; set; }
+    public decimal AverageAmount { get; set; }
   }
 
 }

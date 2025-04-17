@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Api.Controllers
 {
   [ApiController]
+  [Authorize(Roles = "Admin")]
   [Route("api/backup")]
   public class BackupController : ControllerBase
   {

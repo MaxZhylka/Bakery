@@ -8,7 +8,7 @@ namespace backend.Core.DTOs
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
 
-        public int Value { get; set; }
+        public decimal Value { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public LoanApplicationStatus Status { get; set; }

@@ -6,6 +6,7 @@
     <input matInput formControlName="value" type="number">
     <mat-error *ngIf="form.get('value')?.hasError('required')">Вкажіть суму</mat-error>
     <mat-error *ngIf="form.get('value')?.hasError('max')">Максимум 20000</mat-error>
+    <mat-error *ngIf="form.get('value')?.hasError('min')">Cума не може бути менша за 0!</mat-error>
   </mat-form-field>
 
   <mat-form-field class="w-[300px]">

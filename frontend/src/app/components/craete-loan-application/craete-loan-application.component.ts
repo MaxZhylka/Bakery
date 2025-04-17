@@ -45,7 +45,7 @@ export class CreateLoanApplicationComponent {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.form = this.fb.group({
-      value: [null, [Validators.required, Validators.max(20000)]],
+      value: [null, [Validators.required, Validators.min(0), Validators.max(20000)]],
       term: [null, Validators.required],
     });
   }

@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations.Schema;
 using backend.Core.Enums;
 
 namespace backend.Core.Entities
@@ -10,7 +11,8 @@ namespace backend.Core.Entities
 
     public Guid LoanId { get; set; }
 
-    public int Value { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal Value { get; set; }
 
     public PaymentStatus Status { get; set; }
 

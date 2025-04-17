@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Database
 {
-public class AppDbContext : DbContext
-{
+  public class AppDbContext : DbContext
+  {
     public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options)
+      : base(options)
     {
     }
 
@@ -21,7 +21,7 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+      base.OnModelCreating(modelBuilder);
     }
-}
+  }
 }

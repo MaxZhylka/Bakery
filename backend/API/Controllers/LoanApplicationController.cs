@@ -24,6 +24,7 @@ namespace backend.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetLoanApplications([FromQuery] PaginationParameters parameters)
         {
             var result = await _repository.GetLoanApplicationsAsync(parameters);
@@ -39,6 +40,7 @@ namespace backend.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateLoanApplication([FromBody] CreateLoanApplicationDTO applicationDto)
         {
             var application = await _repository.CreateLoanApplicationAsync(applicationDto);

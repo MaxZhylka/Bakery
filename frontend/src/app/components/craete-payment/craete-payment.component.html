@@ -7,6 +7,7 @@
     <input matInput formControlName="value">
     <mat-error *ngIf="form.get('value')?.hasError('required')">Це поле обов'язкове</mat-error>
     <mat-error *ngIf="form.get('value')?.hasError('max')">Сумма не може бути більша за весь борг</mat-error>
+    <mat-error *ngIf="form.get('value')?.hasError('min')">Сумма не може бути менша за 0</mat-error>
   </mat-form-field>
 
   <div class="flex justify-center gap-4 pt-4">

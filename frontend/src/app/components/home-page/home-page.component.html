@@ -74,6 +74,7 @@
               <mat-error *ngIf="loanForm.get('value')?.hasError('max') && loanForm.get('value')?.touched">
                 Не можна зайняти більше ніж {{20000 | currency:'UAH':'symbol':'1.2-2':'uk-UA'}}
               </mat-error>
+              <mat-error *ngIf="loanForm.get('value')?.hasError('min')">Cума не може бути менша за 0!</mat-error>
             </mat-form-field>
             <mat-form-field class="w-[75%]">
               <mat-label class="!text-[20px]">Термін</mat-label>

@@ -111,10 +111,13 @@ namespace backend.Infrastructure.Repositories
 
       loan.CompletedValue += paymentDto.Value;
       loan.LeftValue -= paymentDto.Value;
-
+      if(loan.LeftValue <= 000001m)
+      {
+        loan.Status = LoanStatus.Completed;
+        loan.LeftValue = 0;
+      } else
       if (paymentDto.Value >= loan.ValueToPayOnCurrentMonth)
       {
-        var surplus = paymentDto.Value - loan.ValueToPayOnCurrentMonth;
 
         loan.NextPaymentDate = loan.NextPaymentDate.AddMonths(1);
         if (loan.LeftValue / (int)loan.Term > loan.LeftValue)

@@ -7,7 +7,7 @@ namespace backend.Core.DTOs
     {
         public Guid UserId { get; set; }
 
-        public int Value { get; set; }
+        public decimal Value { get; set; }
 
         public Guid LoanId { get; set; }
     }

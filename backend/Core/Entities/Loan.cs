@@ -16,7 +16,9 @@ namespace backend.Core.Entities
     [Column(TypeName = "decimal(18,2)")]
     public decimal ValueToPay { get; set; }
     public DateTime NextPaymentDate { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public required decimal CompletedValue { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
     public required decimal LeftValue { get; set; }
     public LoanStatus Status { get; set; }
 

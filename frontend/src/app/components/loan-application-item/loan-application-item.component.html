@@ -36,7 +36,7 @@
     }
   </p>
 
-  @if (loanApplication.status === loanApplicationStatuses.Moderation && role === roles.Admin) {
+  @if (loanApplication.status === loanApplicationStatuses.Moderation && (role === roles.Admin || role === roles.Manager)) {
     <div class="flex gap-[31px]">
       <button mat-fab (click)="approve()">
         <mat-icon class="text-[48px] !size-[48px] text-[#A4FFA7]" matTooltip="Схвалити">done_outline</mat-icon>
