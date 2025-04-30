@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using backend.Infrastructure.Database;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423133500_ForigneKeyAdded")]
+    partial class ForigneKeyAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,11 +40,17 @@ namespace backend.Migrations
                     b.Property<decimal>("LeftValue")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("LoanApplicationStatusTypeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("LoanStatusTypeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("NextPaymentDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("PaymentStatusTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Percent")
                         .HasColumnType("int");
@@ -60,7 +69,11 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LoanApplicationStatusTypeId");
+
                     b.HasIndex("LoanStatusTypeId");
+
+                    b.HasIndex("PaymentStatusTypeId");
 
                     b.HasIndex("UserId");
 
@@ -303,11 +316,19 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Core.Entities.Loan", b =>
                 {
+                    b.HasOne("backend.Core.Entities.LoanApplicationStatusType", null)
+                        .WithMany("Loans")
+                        .HasForeignKey("LoanApplicationStatusTypeId");
+
                     b.HasOne("backend.Core.Entities.LoanStatusType", "LoanStatusType")
                         .WithMany("Loans")
                         .HasForeignKey("LoanStatusTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.PaymentStatusType", null)
+                        .WithMany("Loans")
+                        .HasForeignKey("PaymentStatusTypeId");
 
                     b.HasOne("backend.Core.Entities.User", "User")
                         .WithMany("Loans")
@@ -323,7 +344,7 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Core.Entities.LoanApplication", b =>
                 {
                     b.HasOne("backend.Core.Entities.LoanApplicationStatusType", "LoanApplicationStatusType")
-                        .WithMany("LoanApplications")
+                        .WithMany()
                         .HasForeignKey("LoanApplicationStatusTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -348,7 +369,7 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Core.Entities.Payment", b =>
                 {
                     b.HasOne("backend.Core.Entities.PaymentStatusType", "PaymentStatusType")
-                        .WithMany("Payments")
+                        .WithMany()
                         .HasForeignKey("PaymentStatusTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -388,7 +409,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Core.Entities.LoanApplicationStatusType", b =>
                 {
-                    b.Navigation("LoanApplications");
+                    b.Navigation("Loans");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.LoanStatusType", b =>
@@ -398,7 +419,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Core.Entities.PaymentStatusType", b =>
                 {
-                    b.Navigation("Payments");
+                    b.Navigation("Loans");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.User", b =>

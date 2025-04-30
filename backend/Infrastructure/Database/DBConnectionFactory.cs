@@ -18,6 +18,11 @@ namespace backend.Infrastructure.Database
     public DbSet<RefreshTokens> RefreshTokens { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserActionLog> UserActionLogs { get; set; }
+    public DbSet<SettingsData> SettingsData { get; set; }
+    public DbSet<RejectionReason> RejectionReasons { get; set; }
+    public DbSet<LoanApplicationStatusType> LoanApplicationStatusTypes { get; set; }
+    public DbSet<LoanStatusType> LoanStatusTypes { get; set; }
+    public DbSet<PaymentStatusType> PaymentStatusTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

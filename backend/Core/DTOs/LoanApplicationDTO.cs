@@ -10,10 +10,8 @@ namespace backend.Core.DTOs
 
         public decimal Value { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public LoanApplicationStatus Status { get; set; }
+        public string Status { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public LoanTerm Term { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? RejectionReason { get; set; }

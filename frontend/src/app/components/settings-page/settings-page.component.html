@@ -1,0 +1,39 @@
+<mat-card class="settings-card w-[50%] mx-auto flex flex-col items-center mt-[50px] py-[30px]">
+  <mat-icon color="primary">settings</mat-icon>
+  <h2 class="title">Налаштування звітів та бекапу</h2>
+
+  <mat-form-field *ngIf="settings" appearance="fill" class="w-[50%]">
+    <mat-label>Період звітів</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input
+        matStartDate
+        placeholder="Від"
+        [(ngModel)]="settings.startReportDate"
+        name="startDate">
+      <input
+        matEndDate
+        placeholder="До"
+        [(ngModel)]="settings.endReportDate"
+        name="endDate">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker startView="multi-year"></mat-date-range-picker>
+    <mat-error *ngIf="!settings.startReportDate || !settings.endReportDate">
+      Будь ласка, виберіть обидві дати
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
+    <mat-label>Шлях до папки бекапів</mat-label>
+    <input
+      matInput
+      placeholder="Наприклад, C:\Backups"
+      [(ngModel)]="settings.backupPath"
+      name="backupPath">
+  </mat-form-field>
+  <div class="actions">
+    <button mat-raised-button color="primary" (click)="onSave()">
+      Змінити
+    </button>
+  </div>
+</mat-card>

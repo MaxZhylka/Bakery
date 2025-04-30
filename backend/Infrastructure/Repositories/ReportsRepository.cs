@@ -20,14 +20,16 @@ public class ReportRepository : IReportRepository
     {
         return await _context.LoanApplications
             .Where(app => app.CreatedAt >= from && app.CreatedAt <= to)
+            .Include(app => app.LoanApplicationStatusType)
             .GroupBy(app => new { app.CreatedAt.Year, app.CreatedAt.Month })
+
             .Select(g => new LoanApplicationReportDto
             {
                 Year = g.Key.Year,
                 Month = g.Key.Month,
                 Total = g.Count(),
-                Rejected = g.Count(x => x.Status == LoanApplicationStatus.Rejected),
-                RejectedPercent = (double)g.Count(x => x.Status == LoanApplicationStatus.Rejected) / g.Count() * 100
+                Rejected = g.Count(x => x.LoanApplicationStatusType.Name == "Rejected"),
+                RejectedPercent = (double)g.Count(x => x.LoanApplicationStatusType.Name == "Rejected") / g.Count() * 100
             })
             .ToListAsync();
     }
@@ -80,7 +82,8 @@ public class ReportRepository : IReportRepository
     public async Task<List<Loan>> GetCompletedLoansAsync()
     {
         return await _context.Loans
-            .Where(l => l.Status == LoanStatus.Completed)
+            .Include(l => l.LoanStatusType)
+            .Where(l => l.LoanStatusType.Name == "Completed")
             .ToListAsync();
     }
 }

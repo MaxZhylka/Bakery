@@ -39,8 +39,8 @@ export class LoanApplicationService {
     return this.http.post<LoanApplication>(`${this.apiUrl}/approve/${applicationId}`, {});
   }
 
-  public rejectLoanApplication(applicationId: string): Observable<LoanApplication> {
-    return this.http.post<LoanApplication>(`${this.apiUrl}/reject/${applicationId}`, {});
+  public rejectLoanApplication(applicationId: string, reason: string): Observable<LoanApplication> {
+    return this.http.post<LoanApplication>(`${this.apiUrl}/reject/${applicationId}`, { reason });
   }
 
 

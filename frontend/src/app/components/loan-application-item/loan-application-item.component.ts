@@ -6,6 +6,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngxs/store';
 import { ApproveApplication, RejectApplication } from '../../store/loan-application.actions';
+import { CreateRejectionReasonComponent } from '../create-rejection-reason/create-rejection-reason.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-loan-application-item',
@@ -23,13 +25,20 @@ export class LoanApplicationItemComponent {
   userData!: User | null;
   roles = Roles;
 
-  constructor(private readonly store: Store) {}
+  constructor(private readonly store: Store, private readonly dialog: MatDialog) { }
 
   public approve(): void {
     this.store.dispatch(new ApproveApplication(this.loanApplication.id));
   }
 
   public reject(): void {
-    this.store.dispatch(new RejectApplication(this.loanApplication.id));
+    const dialogRef = this.dialog.open(CreateRejectionReasonComponent, {
+      width: '400px',
+    })
+
+    dialogRef.afterClosed().subscribe((reason) => {
+        this.store.dispatch(new RejectApplication(this.loanApplication.id, reason));
+    });
+
   }
 }

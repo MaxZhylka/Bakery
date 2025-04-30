@@ -20,12 +20,13 @@ namespace backend.Core.Entities
     public required decimal CompletedValue { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public required decimal LeftValue { get; set; }
-    public LoanStatus Status { get; set; }
+    public int LoanStatusTypeId { get; set; }
 
     public LoanTerm Term { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;
+    public LoanStatusType LoanStatusType { get; set; } = null!;
   }
 
 }

@@ -1,6 +1,7 @@
 using backend.Core.DTOs;
 using backend.Core.Models;
 using backend.Infrastructure.Repositories;
+using Core.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Api.Controllers
@@ -16,6 +17,7 @@ namespace backend.Api.Controllers
             _repository = repository;
         }
 
+        [ErrorHandler]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetPayment(Guid id)
         {
@@ -23,6 +25,7 @@ namespace backend.Api.Controllers
             return Ok(payment);
         }
 
+        [ErrorHandler]
         [HttpGet]
         public async Task<IActionResult> GetPayments([FromQuery] PaginationParameters parameters)
         {
@@ -30,6 +33,7 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [ErrorHandler]
         [HttpGet]
         [Route("user/{userId:guid}")]
         public async Task<IActionResult> GetPaymentsByUserId(Guid userId, [FromQuery] PaginationParameters parameters)
@@ -38,7 +42,7 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
-
+        [ErrorHandler]
         [HttpPost]
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO paymentDto)
         {
@@ -46,6 +50,7 @@ namespace backend.Api.Controllers
             return CreatedAtAction(nameof(GetPayment), new { id = payment.Id }, payment);
         }
 
+        [ErrorHandler]
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdatePayment(Guid id, [FromBody] PaymentDTO paymentDto)
         {
@@ -53,6 +58,7 @@ namespace backend.Api.Controllers
             return Ok(updatedPayment);
         }
 
+        [ErrorHandler]
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeletePayment(Guid id)
         {

@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -14,14 +15,14 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './backup-page.component.scss'
 })
 export class BackupPageComponent {
-  backupFolderPath: string = 'C:\\';
+
   selectedFile: File | null = null;
   selectedFileName: string | null = null;
 
-  constructor(private readonly backupService: BackupService) { }
+  constructor(private readonly backupService: BackupService, private readonly snackBar: MatSnackBar) { }
 
   downloadBackup(): void {
-    this.backupService.downloadBackup(this.backupFolderPath)
+    this.backupService.downloadBackup()
       .subscribe(blob => {
         const filename = `backup_${new Date().toISOString().replace(/[:.-]/g, '')}.bak`;
 
@@ -38,22 +39,26 @@ export class BackupPageComponent {
     const input = event.target as HTMLInputElement;
 
     if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
       this.selectedFileName = input.files[0].name;
-
     } else {
       this.selectedFileName = null;
     }
   }
 
   restoreBackup(): void {
+    console.log(this.selectedFile)
     if (!this.selectedFile) {
       alert('Выберите файл для восстановления.');
       return;
     }
 
     this.backupService.restoreBackup(this.selectedFile).pipe()
-      .subscribe((response) => {
-        alert('База данных успешно восстановлена.');
-      });
+      .subscribe((response) => this.snackBar.open(
+        'Базу даних востановлено!',
+        '✖',
+        { duration: 5000 }
+      )
+      );
   }
 }

@@ -25,6 +25,7 @@
     <a *ngIf="userData.role === roles.Admin || userData.role === roles.Manager" routerLink="/users" mat-button>Користувачі</a>
     <a *ngIf="userData.role === roles.Admin" routerLink="/logs" mat-button>Журнал</a>
     <a *ngIf="userData.role === roles.Admin" routerLink="/backup" mat-button>Сервіс</a>
+    <a *ngIf="userData.role === roles.Admin" routerLink="/settings" mat-button>Налаштування</a>
     <a routerLink="/loan-applications" mat-button>Заявки на займ</a>
     @if (userData.role === roles.User) {
       <a routerLink="/loans" mat-button>Мої займи</a>

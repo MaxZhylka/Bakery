@@ -39,6 +39,7 @@ builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanApplicationRepository, LoanApplicationRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IBackupRepository, BackupRepository>();
+builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentityServer();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -84,6 +85,8 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await DataSeeder.SeedAdminUserAsync(dbContext);
+    await DataSeeder.SeedDefaultSettings(dbContext);
+    await DataSeeder.SeedStatusTypesAsync(dbContext);
 }
 
 if (app.Environment.IsDevelopment())

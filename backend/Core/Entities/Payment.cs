@@ -14,7 +14,8 @@ namespace backend.Core.Entities
     [Column(TypeName = "decimal(18,2)")]
     public decimal Value { get; set; }
 
-    public PaymentStatus Status { get; set; }
+    public int PaymentStatusTypeId { get; set; }
+    public PaymentStatusType PaymentStatusType { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
     public User User { get; set; } = null!;

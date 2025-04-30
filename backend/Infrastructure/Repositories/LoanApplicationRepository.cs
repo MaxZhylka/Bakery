@@ -20,7 +20,7 @@ namespace backend.Infrastructure.Repositories
 
     public async Task<LoanApplicationDTO> GetLoanApplicationAsync(Guid id)
     {
-      var application = await _context.LoanApplications
+      var application = await _context.LoanApplications.Include(a => a.LoanApplicationStatusType)
           .FirstOrDefaultAsync(a => a.Id == id);
 
       if (application == null)
@@ -31,7 +31,7 @@ namespace backend.Infrastructure.Repositories
         Id = application.Id,
         UserId = application.UserId,
         Value = application.Value,
-        Status = application.Status,
+        Status = application.LoanApplicationStatusType.Name,
         Term = application.Term,
         CreatedAt = application.CreatedAt,
         ClientEmail = application.User.Email
@@ -42,6 +42,7 @@ namespace backend.Infrastructure.Repositories
     {
 
       var query = _context.LoanApplications
+      .Include(a => a.LoanApplicationStatusType)
           .Where(la => la.UserId == userId)
           .OrderByDescending(la => la.CreatedAt);
 
@@ -49,16 +50,17 @@ namespace backend.Infrastructure.Repositories
 
       var applications = await query
           .Skip(parameters.Offset * parameters.Size)
+          .Include(app => app.RejectionReason)
           .Take(parameters.Size)
           .Select(application => new LoanApplicationDTO
           {
             Id = application.Id,
             UserId = application.UserId,
             Value = application.Value,
-            Status = application.Status,
+            Status = application.LoanApplicationStatusType.Name,
             Term = application.Term,
             CreatedAt = application.CreatedAt,
-            RejectionReason = application.RejectionReason,
+            RejectionReason = application.RejectionReason.reason,
             ClientEmail = application.User.Email
           })
           .ToListAsync();
@@ -73,12 +75,16 @@ namespace backend.Infrastructure.Repositories
     public async Task ApproveLoanApplicationAsync(Guid id)
     {
       var application = await _context.LoanApplications
-          .FirstOrDefaultAsync(la => la.Id == id);
+          .FirstOrDefaultAsync(la => la.Id == id) ??
+          throw new DatabaseOperationException(Operations.UpdateLoanApplication, new Exception("Loan application not found"));
 
-      if (application == null)
-        throw new DatabaseOperationException(Operations.UpdateLoanApplication, new Exception("Loan application not found"));
+      var approvedStatus = await _context.LoanApplicationStatusTypes.FirstOrDefaultAsync(a => a.Name == "Approved") ??
+          throw new DatabaseOperationException(Operations.ApproveLoanApplication, new Exception("Not Found status"));
 
-      application.Status = LoanApplicationStatus.Approved;
+      application.LoanApplicationStatusTypeId = approvedStatus.Id;
+
+      var getMoneyStatus = await _context.LoanStatusTypes.FirstOrDefaultAsync(a => a.Name == "GetMoney") ??
+          throw new DatabaseOperationException(Operations.ApproveLoanApplication, new Exception("Not Found status"));
 
       decimal percent = (decimal)(int)application.Term * 2;
       decimal multiplier = 1 + percent / 100m;
@@ -93,7 +99,7 @@ namespace backend.Infrastructure.Repositories
         CompletedValue = 0,
         NextPaymentDate = DateTime.UtcNow.AddMonths(1),
         LeftValue = Math.Round(application.Value * multiplier, 2),
-        Status = LoanStatus.GetMoney,
+        LoanStatusTypeId = getMoneyStatus.Id,
         Term = application.Term,
         CreatedAt = DateTime.UtcNow
       });
@@ -109,15 +115,20 @@ namespace backend.Infrastructure.Repositories
       if (application == null)
         throw new DatabaseOperationException(Operations.UpdateLoanApplication, new Exception("Loan application not found"));
 
-      application.Status = LoanApplicationStatus.Rejected;
-      application.RejectionReason = reason;
+      var approvedStatus = await _context.LoanApplicationStatusTypes.FirstOrDefaultAsync(a => a.Name == "Rejected") ??
+    throw new DatabaseOperationException(Operations.ApproveLoanApplication, new Exception("Not Found status"));
+      application.LoanApplicationStatusTypeId = approvedStatus.Id;
+
+      RejectionReason rejectionReason = new RejectionReason { Id = Guid.NewGuid(), reason = reason };
+      await _context.RejectionReasons.AddAsync(rejectionReason);
+      application.RejectionReasonId = rejectionReason.Id;
 
       await _context.SaveChangesAsync();
     }
 
     public async Task<PaginatedResult<LoanApplicationDTO>> GetLoanApplicationsAsync(PaginationParameters parameters)
     {
-      var query = _context.LoanApplications.OrderByDescending(la => la.CreatedAt);
+      var query = _context.LoanApplications.Include(a => a.LoanApplicationStatusType).OrderByDescending(la => la.CreatedAt);
 
       var totalRecords = await query.CountAsync();
 
@@ -129,7 +140,7 @@ namespace backend.Infrastructure.Repositories
             Id = application.Id,
             UserId = application.UserId,
             Value = application.Value,
-            Status = application.Status,
+            Status = application.LoanApplicationStatusType.Name,
             Term = application.Term,
             CreatedAt = application.CreatedAt,
             ClientEmail = application.User.Email
@@ -145,12 +156,16 @@ namespace backend.Infrastructure.Repositories
 
     public async Task<LoanApplicationDTO> CreateLoanApplicationAsync(CreateLoanApplicationDTO applicationDto)
     {
+
+      var moderationStatus = await _context.LoanApplicationStatusTypes.FirstOrDefaultAsync(a => a.Name == "Moderation") ??
+      throw new DatabaseOperationException(Operations.ApproveLoanApplication, new Exception("Not Found status"));
+
       var application = new LoanApplication
       {
         Id = Guid.NewGuid(),
         UserId = applicationDto.UserId,
         Value = applicationDto.Value,
-        Status = LoanApplicationStatus.Moderation,
+        LoanApplicationStatusTypeId = moderationStatus.Id,
         Term = applicationDto.Term,
         CreatedAt = DateTime.UtcNow
       };
@@ -160,6 +175,7 @@ namespace backend.Infrastructure.Repositories
 
       application = await _context.LoanApplications
           .Include(la => la.User)
+          .Include(la => la.LoanApplicationStatusType)
           .FirstOrDefaultAsync(la => la.Id == application.Id);
 
       return new LoanApplicationDTO
@@ -167,7 +183,7 @@ namespace backend.Infrastructure.Repositories
         Id = application.Id,
         UserId = application.UserId,
         Value = application.Value,
-        Status = application.Status,
+        Status = application.LoanApplicationStatusType.Name,
         Term = application.Term,
         CreatedAt = application.CreatedAt,
         ClientEmail = application.User.Email
@@ -181,8 +197,11 @@ namespace backend.Infrastructure.Repositories
       if (application == null)
         throw new DatabaseOperationException(Operations.UpdateLoanApplication, new Exception("Loan application not found"));
 
+      var applicationStatus = await _context.LoanApplicationStatusTypes.FirstOrDefaultAsync(a => a.Name == applicationDto.Status) ??
+      throw new DatabaseOperationException(Operations.ApproveLoanApplication, new Exception("Not Found status"));
+
       application.Value = applicationDto.Value;
-      application.Status = applicationDto.Status;
+      application.LoanApplicationStatusTypeId = applicationStatus.Id;
       application.Term = applicationDto.Term;
 
       await _context.SaveChangesAsync();
@@ -192,7 +211,7 @@ namespace backend.Infrastructure.Repositories
         Id = application.Id,
         UserId = application.UserId,
         Value = application.Value,
-        Status = application.Status,
+        Status = applicationStatus.Name,
         Term = application.Term,
         CreatedAt = application.CreatedAt,
         ClientEmail = application.User.Email

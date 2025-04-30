@@ -13,8 +13,7 @@ namespace backend.Core.DTOs
         public decimal ValueToPayOnCurrentMonth { get; set; }
         public decimal ValueToPay { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public LoanStatus Status { get; set; }
+        public required string Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
@@ -23,5 +22,6 @@ namespace backend.Core.DTOs
         public required decimal LeftValue { get; set; }
 
         public required string ClientEmail { get; set; }
+        public LoanTerm Term { get; set; }
     }
 }

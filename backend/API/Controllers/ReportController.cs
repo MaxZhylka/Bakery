@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Core.Interfaces;
+using Core.Attributes;
 
 namespace backend.Api.Controllers
 {
@@ -14,6 +15,7 @@ namespace backend.Api.Controllers
             _reportService = reportService;
         }
 
+        [ErrorHandler]
         [HttpGet("loan-applications-month")]
         public async Task<IActionResult> GetLoanApplicationsByMonth([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
@@ -21,6 +23,7 @@ namespace backend.Api.Controllers
             return File(reportBytes, "application/pdf", $"LoanApplications_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
         }
 
+        [ErrorHandler]
         [HttpGet("money-flow")]
         public async Task<IActionResult> GetMoneyFlowReport([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
@@ -28,6 +31,7 @@ namespace backend.Api.Controllers
             return File(reportBytes, "application/pdf", $"MoneyFlow_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
         }
 
+        [ErrorHandler]
         [HttpGet("applications-per-user")]
         public async Task<IActionResult> GetUserApplicationsReport([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
@@ -35,6 +39,7 @@ namespace backend.Api.Controllers
             return File(reportBytes, "application/pdf", $"ApplicationsPerUser_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
         }
 
+        [ErrorHandler]
         [HttpGet("monthly-payments")]
         public async Task<IActionResult> GetMonthlyPaymentsReport([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
@@ -42,6 +47,7 @@ namespace backend.Api.Controllers
             return File(reportBytes, "application/pdf", $"MonthlyPayments_{from:yyyyMMdd}_{to:yyyyMMdd}.pdf");
         }
 
+        [ErrorHandler]
         [HttpGet("completed-loans")]
         public async Task<IActionResult> GetCompletedLoansReport()
         {

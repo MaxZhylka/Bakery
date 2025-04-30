@@ -10,8 +10,7 @@ namespace backend.Core.DTOs
 
         public decimal Value { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PaymentStatus Status { get; set; }
+        public string Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

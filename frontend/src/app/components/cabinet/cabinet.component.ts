@@ -6,12 +6,13 @@ import { Store } from '@ngxs/store';
 import { Logout } from '../../store/app.actions';
 import { ReportService } from '../../services/report-service/report.service';
 import { filter, Observable, Subject, takeUntil } from 'rxjs';
-import { User, Roles } from '../../interfaces';
+import { User, Roles, SettingsData } from '../../interfaces';
 import { UserState } from '../../store/app.state';
 import { MatDatepickerModule} from '@angular/material/datepicker';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
+import { BackupService } from '../../services/backup-service/backup-service.service';
 
 @Component({
   selector: 'app-cabinet',
@@ -30,12 +31,16 @@ export class CabinetComponent implements OnInit {
   monthlyPaymentsReportRange: any = { from: null, to: null };
   userApplicationsReportRange: any = { from: null, to: null };
 
-  constructor(private readonly store: Store, private readonly reportService: ReportService) { }
+  constructor(private readonly store: Store, private readonly reportService: ReportService, private readonly backupService: BackupService) { }
 
   public ngOnInit(): void {
     this.user$ = this.store.select(UserState.currentUser);
     this.user$.pipe(filter(user => Boolean(user)), takeUntil(this.destroy$))
       .subscribe(user => this.userData = user);
+
+    this.backupService.loadSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(settings => this.applyDefaultDates(settings));
   }
 
   public ngOnDestroy(): void {
@@ -66,5 +71,15 @@ export class CabinetComponent implements OnInit {
 
   downloadUserApplicationsReport(): void {
     this.reportService.saveUserApplicationsReport(this.userApplicationsReportRange.from, this.userApplicationsReportRange.to);
+  }
+
+  private applyDefaultDates(settings: SettingsData) {
+    const from = new Date(settings.startReportDate);
+    const to   = new Date(settings.endReportDate);
+
+    this.loanApplicationsReportRange = { from, to };
+    this.moneyFlowReportRange        = { from, to };
+    this.monthlyPaymentsReportRange  = { from, to };
+    this.userApplicationsReportRange = { from, to };
   }
 }

@@ -283,6 +283,13 @@ export interface ILoanApplicationCreate {
     userId?: string;
 }
 
+export interface SettingsData {
+    id?: string | null;
+    startReportDate: Date;  
+    endReportDate: Date;
+    backupPath: string;
+}
+
 
 export const actionsList = [
     "Login",

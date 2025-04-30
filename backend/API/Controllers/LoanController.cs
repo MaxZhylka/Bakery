@@ -1,5 +1,6 @@
 using backend.Core.DTOs;
 using backend.Core.Models;
+using Core.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Api.Controllers
@@ -15,6 +16,7 @@ namespace backend.Api.Controllers
             _repository = repository;
         }
 
+        [ErrorHandler]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetLoan(Guid id)
         {
@@ -22,6 +24,7 @@ namespace backend.Api.Controllers
             return Ok(loan);
         }
 
+        [ErrorHandler]
         [HttpGet]
         public async Task<IActionResult> GetLoans([FromQuery] PaginationParameters parameters)
         {
@@ -29,6 +32,7 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [ErrorHandler]
         [HttpGet]
         [Route("user/{userId:guid}")]
         public async Task<IActionResult> GetLoansByUserId(Guid userId, [FromQuery] PaginationParameters parameters)
@@ -37,6 +41,7 @@ namespace backend.Api.Controllers
             return Ok(result);
         }
 
+        [ErrorHandler]
         [HttpPost("{id:guid}")]
 
         public async Task<IActionResult> GetMoneyByLoanId(Guid id)
@@ -45,6 +50,7 @@ namespace backend.Api.Controllers
             return Ok();
         }
 
+        [ErrorHandler]
         [HttpPost]
         public async Task<IActionResult> CreateLoan([FromBody] LoanDTO loanDto)
         {
@@ -52,6 +58,7 @@ namespace backend.Api.Controllers
             return CreatedAtAction(nameof(GetLoan), new { id = loan.Id }, loan);
         }
 
+        [ErrorHandler]
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateLoan(Guid id, [FromBody] LoanDTO loanDto)
         {
@@ -59,6 +66,7 @@ namespace backend.Api.Controllers
             return Ok(updatedLoan);
         }
 
+        [ErrorHandler]
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteLoan(Guid id)
         {

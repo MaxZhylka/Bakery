@@ -204,9 +204,9 @@ export class LoanApplicationState {
   }
 
   @Action(RejectApplication)
-  rejectLoanApplication(ctx: StateContext<LoanApplicationStateModel>, { applicationId }: RejectApplication) {
+  rejectLoanApplication(ctx: StateContext<LoanApplicationStateModel>, { applicationId, reason }: RejectApplication) {
     this.store.dispatch(new SetLoading(true));
-    return this.loanApplicationService.rejectLoanApplication(applicationId).pipe(
+    return this.loanApplicationService.rejectLoanApplication(applicationId, reason).pipe(
       tap(() => {
         ctx.patchState({ error: null });
         this.snackBar.open('Заявка відхилена', 'Закрити', { duration: 3000 });

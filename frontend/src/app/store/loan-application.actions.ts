@@ -71,7 +71,7 @@ export class ApproveApplication {
 
 export class RejectApplication {
   static readonly type = '[LoanApplications] Reject loan application';
-  constructor(public applicationId: string) { }
+  constructor(public applicationId: string, public reason: string) { }
 }
 
 export class CreateApplicationDraft {
