@@ -1,9 +1,9 @@
-using Microsoft.Data.SqlClient;
+using MySqlConnector;
 
 namespace backend.Infrastructure.Interfaces
 {
   public interface IDBConnectionFactory
   {
-    SqlConnection CreateConnection();
+    MySqlConnection CreateConnection();
   }
 }

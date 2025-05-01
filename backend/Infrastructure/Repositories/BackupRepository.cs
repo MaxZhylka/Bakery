@@ -3,9 +3,8 @@ using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using backend.Infrastructure.Database;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-
+using MySqlConnector;
 public class BackupRepository : IBackupRepository
 {
   private readonly AppDbContext _context;
@@ -43,13 +42,12 @@ public class BackupRepository : IBackupRepository
     await _context.Database.CloseConnectionAsync();
     await _context.DisposeAsync();
 
-    var connectionStringBuilder = new SqlConnectionStringBuilder(originalConnectionString)
+    var connectionStringBuilder = new MySqlConnectionStringBuilder(originalConnectionString)
     {
-      InitialCatalog = "master"
     };
     var masterConnectionString = connectionStringBuilder.ConnectionString;
 
-    using var connection = new SqlConnection(masterConnectionString);
+    using var connection = new MySqlConnection(masterConnectionString);
     await connection.OpenAsync();
 
     var killConnectionsSql = $@"

@@ -20,7 +20,9 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(DotNetEnv.Env.GetString("CONNECTION_STRING")));
+    options.UseMySql("Server=localhost;Port=3306;Database=maxcoursework;User ID=appuser;Password=securepass;",
+        new MySqlServerVersion(new Version(8, 0, 36))));
+
 
 using var _customFontStream = new MemoryStream(File.ReadAllBytes("./API/Fonts/OpenSans_Condensed-Light.ttf"));
 FontManager.RegisterFont(_customFontStream);
