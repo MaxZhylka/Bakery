@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { catchError, Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { SettingsData } from '../../interfaces';
 import { BackupService } from '../../services/backup-service/backup-service.service';
 import { MatFormField } from '@angular/material/form-field';
@@ -33,14 +33,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   onSave(): void {
     if (this.settings.startReportDate && this.settings.endReportDate) {
-      const updated: SettingsData = {
-        id: "null",
-        startReportDate: this.settings.startReportDate,
-        endReportDate: this.settings.endReportDate,
-        backupPath: this.settings.backupPath
-      };
-
-      this.backupService.updateSettings(updated).pipe(takeUntil(this.destroy$))
+      this.backupService.updateSettings(this.settings).pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => this.snackBar.open(
             'Успішно оновлено',

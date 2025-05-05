@@ -5,7 +5,7 @@
       </div>
       <h1 class="font-[Pangolin] m-0 h-[80px] shrink-0 text-[80px]">МІКРО-ЗАЙМ!</h1>
       <span class="flex items-center gap-[20px] ">
-        <a  mat-fab extended>
+        <a  mat-fab extended routerLink="help/">
           <mat-icon class="text-[28px] !size-[28px]">chat</mat-icon>
           Підтримка</a>
         <a mat-fab extended routerLink="login/">
@@ -40,6 +40,10 @@
 
   <span class="spacer"></span>
 
+  <a  mat-button routerLink="help/">
+    <mat-icon>chat</mat-icon>
+    Підтримка</a>
+  
   <a routerLink="/cabinet" mat-button *ngIf="!isMobile">
     <mat-icon>person</mat-icon>
     Кабінет

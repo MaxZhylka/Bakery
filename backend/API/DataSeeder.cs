@@ -44,7 +44,11 @@ public static class DataSeeder
 			Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
 			StartReportDate = new DateTime(2024, 01, 01),
 			EndReportDate = new DateTime(2026, 12, 31),
-			BackupPath = @"C:\Backups"
+			BackupPath = @"C:\Backups",
+			CEOName = "Тарасенко Дмитро Філіпович",
+			CEOPhone = "+380123456789",
+			HelperName = "Костенко Галина Вікторівна",
+			HelperPhone = "+380987654321"
 		});
 
 		await context.SaveChangesAsync();

@@ -20,7 +20,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql("Server=localhost;Port=3306;Database=maxcoursework;User ID=appuser;Password=securepass;",
+    options.UseMySql("Server=localhost;Port=3308;Database=coursework;User ID=root;Password=Ak785532#;",
         new MySqlServerVersion(new Version(8, 0, 36))));
 
 

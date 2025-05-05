@@ -10,6 +10,7 @@ import { PaymentComponent } from './components/payment/payment.component';
 import { HomePageComponent } from './components/home-page/home-page.component';
 import { BackupPageComponent } from './components/backup-page/backup-page.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
+import { HelpPageComponent } from './components/help-page/help-page.component';
 
 export const routes: Routes = [
   { path: 'login', component: RegistrationFormComponent },
@@ -25,5 +26,6 @@ export const routes: Routes = [
   { path: 'logs', component: LogsComponent, canActivate: [() => authGuard(['Admin'])] },
   { path: 'backup', component: BackupPageComponent, canActivate: [() => authGuard(['Admin'])] },
   { path: 'settings', component: SettingsPageComponent, canActivate: [() => authGuard(['Admin'])] },
+  { path: 'help', component: HelpPageComponent },
   { path: '', component: HomePageComponent, pathMatch: 'full' }
 ];

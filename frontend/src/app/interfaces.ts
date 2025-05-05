@@ -64,6 +64,7 @@ export interface PaginationParams {
 export interface LogsPaginationParams extends PaginationParams {
     operation?: string;
     userRole?: string;
+    searchQuery?: string;
 }
 
 export interface ICreateOrder {
@@ -288,6 +289,10 @@ export interface SettingsData {
     startReportDate: Date;  
     endReportDate: Date;
     backupPath: string;
+    ceoName: string;
+    ceoPhone: string;
+    helperName: string;
+    helperPhone: string;
 }
 
 

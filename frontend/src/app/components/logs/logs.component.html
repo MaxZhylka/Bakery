@@ -1,5 +1,10 @@
 <h2 class="text-center mt-10">Список дій</h2>
 <div [formGroup]="form" class="flex justify-end gap-[30px] pr-[100px]">
+  <mat-form-field appearance="fill">
+    <mat-label>Пошук за ім'ям</mat-label>
+    <input matInput formControlName="searchQuery">
+  </mat-form-field>
+
   <mat-form-field>
     <mat-label>Оберіть дію для фільтрації</mat-label>
     <mat-select formControlName="action" canSelectNullableOptions>

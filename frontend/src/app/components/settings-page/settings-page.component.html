@@ -24,6 +24,42 @@
   </mat-form-field>
 
   <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
+    <mat-label>Ім'я засновника</mat-label>
+    <input
+      matInput
+      [(ngModel)]="settings.ceoName"
+      name="ceoName">
+  </mat-form-field>
+
+  
+  <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
+    <mat-label>Телефон засновника</mat-label>
+    <input
+      matInput
+      [(ngModel)]="settings.ceoPhone"
+      name="ceoPhone">
+  </mat-form-field>
+
+  
+  <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
+    <mat-label>Ім'я помічника</mat-label>
+    <input
+      matInput
+      [(ngModel)]="settings.helperName"
+      name="helperName">
+  </mat-form-field>
+
+  
+  <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
+    <mat-label>Телефон помічника</mat-label>
+    <input
+      matInput
+      [(ngModel)]="settings.helperPhone"
+      name="helperPhone">
+  </mat-form-field>
+
+  
+  <mat-form-field  *ngIf="settings" appearance="fill" class="full-width" class="w-[50%]">
     <mat-label>Шлях до папки бекапів</mat-label>
     <input
       matInput

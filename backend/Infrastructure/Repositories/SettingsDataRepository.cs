@@ -32,6 +32,10 @@ public class SettingsRepository : ISettingsRepository
     settings.StartReportDate = updated.StartReportDate;
     settings.EndReportDate = updated.EndReportDate;
     settings.BackupPath = updated.BackupPath;
+    settings.HelperPhone = updated.HelperPhone;
+    settings.HelperName = updated.HelperName;
+    settings.CEOName = updated.CEOName;
+    settings.CEOPhone = updated.CEOPhone;
 
     await _context.SaveChangesAsync();
   }

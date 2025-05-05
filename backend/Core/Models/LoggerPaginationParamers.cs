@@ -15,5 +15,7 @@ namespace backend.Core.Models
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public Operations? Operation { get; set; } = null;
 
+    public string? SearchQuery { get; set; } = null;
+
   }
 }

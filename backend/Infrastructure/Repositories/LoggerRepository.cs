@@ -68,6 +68,12 @@ namespace backend.Infrastructure.Repositories
                 .Include(l => l.User)
                 .AsQueryable();
 
+
+            if (parameters.SearchQuery != null)
+            {
+                query = query.Where(log => log.User.Name.Contains(parameters.SearchQuery.ToLower()));
+            }
+
             if (parameters.UserRole.HasValue)
             {
                 query = query.Where(log => log.User.Role == parameters.UserRole.Value);

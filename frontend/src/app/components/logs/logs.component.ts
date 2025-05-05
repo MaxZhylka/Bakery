@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngxs/store';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, Subject, takeUntil } from 'rxjs';
 import { GetLogs } from '../../store/logs.actions';
 import { DataByPagination, Log, Roles, actionsList, rolesList, LogsPaginationParams } from '../../interfaces';
 import { DatePipe } from '@angular/common';
@@ -11,10 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { LogsState } from '../../store/logs.state';
 import { MatSelectModule } from '@angular/material/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-logs',
-  imports: [MatTableModule, MatPaginator, DatePipe, MatIconModule, MatButtonModule, MatSelectModule, ReactiveFormsModule],
+  imports: [MatTableModule, MatPaginator, DatePipe, MatIconModule, MatButtonModule, MatSelectModule, ReactiveFormsModule, MatInputModule],
   templateUrl: './logs.component.html',
   styleUrls: ['./logs.component.scss'],
 })
@@ -28,13 +29,14 @@ export class LogsComponent implements OnInit, OnDestroy {
   public userRoles = rolesList;
   public logs$!: Observable<DataByPagination<Log[]>>;
   public totalCount: number = 0;
-  public form: FormGroup
+  public form: FormGroup;
   private readonly destroy$: Subject<void> = new Subject<void>();
 
   constructor(private readonly store: Store, private readonly fb: FormBuilder) {
     this.form = this.fb.group({
       action: "",
       role: "",
+      searchQuery: ""
     })
   }
 
@@ -45,6 +47,12 @@ export class LogsComponent implements OnInit, OnDestroy {
       this.dataSource = value.data;
       this.totalCount = value.total;
     });
+
+    this.form.get('searchQuery')?.valueChanges.pipe(debounceTime(200),distinctUntilChanged(),takeUntil(this.destroy$)).subscribe((value) => {
+      this.paginationParams.searchQuery = value;
+      this.store.dispatch(new GetLogs(this.paginationParams));
+    });
+
 
     this.form.get('action')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value) => {
       this.paginationParams.operation = value;
