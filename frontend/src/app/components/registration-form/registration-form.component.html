@@ -1,44 +1,57 @@
+<mat-progress-bar *ngIf="isLoading$ | async" mode="indeterminate" class="w-full mb-6"></mat-progress-bar>
+<div class="flex flex-col items-center justify-center h-[75%]">
+  <h1 class="text-2xl font-bold mb-6">
+    {{ isRegisterRoute ? 'Форма реєстрації' : 'Форма входу' }}
+  </h1>
 
-    <mat-progress-bar *ngIf="isLoading$ | async" mode="indeterminate" class="w-full mb-6"></mat-progress-bar>
-    <div class="flex flex-col items-center justify-center h-[75%]">
-        <h1 class="text-2xl font-bold mb-6">{{ isRegisterRoute ? 'Registration Form' : 'Login Form' }}</h1>
+  <form [formGroup]="loginForm" class="flex flex-col items-center w-96 gap-3" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Введіть вашу електронну пошту</mat-label>
+      <input matInput placeholder="ivan@example.com" formControlName="email" required />
+      <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+        Електронна пошта обов'язкова
+      </mat-error>
+      <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+        Невірний формат електронної пошти
+      </mat-error>
+    </mat-form-field>
 
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Введіть ваш пароль</mat-label>
+      <input matInput placeholder="Ваш пароль" formControlName="password" type="password" required />
+      <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+        Пароль обов’язковий
+      </mat-error>
+      <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+        Пароль має містити щонайменше 6 символів
+      </mat-error>
+    </mat-form-field>
 
-        <form [formGroup]="loginForm" class="flex flex-col items-center w-96 gap-3" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Enter your email</mat-label>
-            <input matInput placeholder="pat@example.com" formControlName="email" required>
-            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Email is required</mat-error>
-            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Invalid email format</mat-error>
-        </mat-form-field>
-    
-        <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Enter your password</mat-label>
-            <input matInput placeholder="Your password" formControlName="password" type="password" required>
-            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Password is required</mat-error>
-            <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">Password must be at least 6 characters</mat-error>
-        </mat-form-field>
-    
-        <mat-form-field *ngIf="isRegisterRoute" appearance="fill" class="w-full">
-            <mat-label>Enter your username</mat-label>
-            <input matInput placeholder="Your username" formControlName="login" required>
-            <mat-error *ngIf="loginForm.get('login')?.hasError('required')">Username is required</mat-error>
-            <mat-error *ngIf="loginForm.get('login')?.hasError('minlength')">Username must be at least 3 characters</mat-error>
-        </mat-form-field>
-    
-        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid" class="w-full">
-            {{ isRegisterRoute ? 'Register' : 'Login' }}
-        </button>
-        </form>
-    
-        <p class="mt-4">
-        <span *ngIf="isRegisterRoute">Already have an account?
-            <a routerLink="/login" class="text-blue-500 hover:underline">Log in</a>
-        </span>
-    
-        <span *ngIf="!isRegisterRoute">Don't have an account?
-            <a routerLink="/register" class="text-blue-500 hover:underline">Register</a>
-        </span>
-        </p>
-    </div>
-    
+    <mat-form-field *ngIf="isRegisterRoute" appearance="fill" class="w-full">
+      <mat-label>Введіть ім'я та прізвище </mat-label>
+      <input matInput placeholder="Ваш логін" formControlName="login" required />
+      <mat-error *ngIf="loginForm.get('login')?.hasError('required')">
+        Ім’я користувача обов’язкове
+      </mat-error>
+      <mat-error *ngIf="loginForm.get('login')?.hasError('minlength')">
+        Ім’я користувача має містити щонайменше 3 символи
+      </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid" class="w-full">
+      {{ isRegisterRoute ? 'Зареєструватися' : 'Увійти' }}
+    </button>
+  </form>
+
+  <p class="mt-4">
+    <span *ngIf="isRegisterRoute">
+      Вже маєте акаунт?
+      <a routerLink="/login" class="text-blue-500 hover:underline">Увійти</a>
+    </span>
+
+    <span *ngIf="!isRegisterRoute">
+      Ще не маєте акаунта?
+      <a routerLink="/register" class="text-blue-500 hover:underline">Зареєструватися</a>
+    </span>
+  </p>
+</div>

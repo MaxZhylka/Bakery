@@ -12,7 +12,7 @@
   <p>
     Термін займу
     <br/>
-    {{ loanApplicationTerm[loanApplication.term]}}
+    {{ loanApplicationTerm[termInNumber]}}
   </p>
   @if (role === roles.Admin) {
     <p>
@@ -39,7 +39,7 @@
   @if (loanApplication.status === loanApplicationStatuses.Moderation && (role === roles.Admin || role === roles.Manager)) {
     <div class="flex gap-[31px]">
       <button mat-fab (click)="approve()">
-        <mat-icon class="text-[48px] !size-[48px] text-[#A4FFA7]" matTooltip="Схвалити">done_outline</mat-icon>
+        <mat-icon class="text-[48px] !size-[48px] text-[#26b047]" matTooltip="Схвалити">done_outline</mat-icon>
       </button>
       <button mat-fab (click)="reject()">
         <mat-icon class="text-[48px] !size-[48px] text-[#FF7777]" matTooltip="Відхилити">thumb_down</mat-icon>

@@ -112,6 +112,14 @@ export enum LoanTerm {
     OneYear = 'OneYear'
 }
 
+export const LoanTermViewMap2: Record<number, string> = {
+    1: '1 місяць',
+    2: "2 місяці",
+    3: '3 місяці',
+    6: '6 місяців',
+    12: "1 рік"
+}
+
 export const LoanTermViewMap: Record<LoanTerm, string> = {
     [LoanTerm.OneMonth]: '1 місяць',
     [LoanTerm.TwoMonth]: "2 місяці",
@@ -286,7 +294,7 @@ export interface ILoanApplicationCreate {
 
 export interface SettingsData {
     id?: string | null;
-    startReportDate: Date;  
+    startReportDate: Date;
     endReportDate: Date;
     backupPath: string;
     ceoName: string;
