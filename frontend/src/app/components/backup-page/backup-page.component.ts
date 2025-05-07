@@ -49,13 +49,13 @@ export class BackupPageComponent {
   restoreBackup(): void {
     console.log(this.selectedFile)
     if (!this.selectedFile) {
-      alert('Выберите файл для восстановления.');
+      alert('Оберіть файл для відновлення!');
       return;
     }
 
     this.backupService.restoreBackup(this.selectedFile).pipe()
       .subscribe((response) => this.snackBar.open(
-        'Базу даних востановлено!',
+        'Базу даних відновлено!',
         '✖',
         { duration: 5000 }
       )

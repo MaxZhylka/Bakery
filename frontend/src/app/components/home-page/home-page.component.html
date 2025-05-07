@@ -15,8 +15,8 @@
   <section class="mx-auto flex justify-center items-center flex-col gap-[30px] max-w-[1200px]">
     <h2 class="m-0 text-[64px] font-medium">Наші переваги</h2>
     <mat-tab-group class="w-full bg-[#003D3D] rounded-[20px] pb-[10px]">
-      <mat-tab class="main-tab " label="Новим клієнтам">
-        <div class="flex mt-[20px] flex-wrap gap-[30px]">
+      <mat-tab class="main-tab text-[#FFF]" label="Новим клієнтам">
+        <div class="flex text-[#FFF] mt-[20px] flex-wrap gap-[30px]">
             <div class="flex justify-start items-center gap-[10px] max-w-[570px]">
               <img class="pl-[10px]" src="assets/images/newClient1.png" alt="New client 1">
               <p class="m-0 text-[18px]">Видаємо перший кредит онлайн на суму до 20 000 грн зі зниженою процентною ставкою 0,01% на день на перший обраний період </p>
@@ -35,8 +35,8 @@
             </div>
         </div>
       </mat-tab>
-      <mat-tab class="main-tab" label="Постійним клієнтам">
-        <div class="flex mt-[20px] flex-wrap gap-[30px]">
+      <mat-tab  class="main-tab" label="Постійним клієнтам">
+        <div class="flex text-[#FFF] mt-[20px] flex-wrap gap-[30px]">
           <div class="flex justify-start items-center gap-[10px] max-w-[575px]">
             <img class="pl-[10px]" src="assets/images/client1.png" alt="New client 1">
             <p class="m-0 text-[18px]">Підвищуємо суму до 40 000 грн за стандартної процентної ставки 1% на день. Даруємо промокоди та знижки до -99% на майбутні кредити згідно з програмою лояльності</p>
@@ -90,9 +90,9 @@
           </div>
         </form>
         <div class="w-[50%] h-[186px] flex flex-col justify-between">
-          <p class="m-0 text-[32px]">Кількість платежів: {{ getCount() }}</p>
-          <p class="m-0 text-[32px]">Розмір платежу: {{ getPaymentSize() | currency:'UAH':'symbol':'1.2-2':'uk-UA'}}</p>
-          <p class="m-0 text-[32px]">Відсоток: {{ getPercent() }}%</p>
+          <p class="m-0 text-[#FFF] text-[32px]">Кількість платежів: {{ getCount() }}</p>
+          <p class="m-0 text-[#FFF] text-[32px]">Розмір платежу: {{ getPaymentSize() | currency:'UAH':'symbol':'1.2-2':'uk-UA'}}</p>
+          <p class="m-0 text-[#FFF] text-[32px]">Відсоток: {{ getPercent() }}%</p>
         </div>
       </div>
       <button class="!text-[36px] !w-[320px] !h-[80px]" (click)="createApplication()" mat-fab extended>Оформити</button>
