@@ -3,11 +3,12 @@ import { first } from 'rxjs';
 import { BackupService } from '../../services/backup-service/backup-service.service';
 import { SettingsData } from '../../interfaces';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
 
 
 @Component({
   selector: 'app-help-page',
-  imports: [CommonModule],
+  imports: [CommonModule, MatCardModule],
   templateUrl: './help-page.component.html',
   styleUrl: './help-page.component.scss'
 })

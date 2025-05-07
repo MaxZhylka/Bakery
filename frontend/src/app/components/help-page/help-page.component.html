@@ -1,4 +1,4 @@
-<div *ngIf="settings" class="mx-auto text-[24px] font-bold flex flex-col gap-14 px-[50px] mt-[150px] w-1/2 h-[300px] bg-[#191c1c] justify-center rounded-[24px]">
+<mat-card  *ngIf="settings" class="mx-auto text-[24px] font-bold flex flex-col gap-14 px-[50px] mt-[150px] w-1/2 h-[300px] justify-center rounded-[24px]">
   <div>
     <div>Для підтримки ви можете звернутись до нашого помічника</div>
     <div>Телефон: {{settings.helperPhone}}</div>
@@ -9,4 +9,4 @@
     <div>Телефон: {{settings.ceoPhone}}</div>
     <div>{{settings.ceoName}}</div>
   </div>
-</div>
+</mat-card >
